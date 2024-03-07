@@ -15,10 +15,10 @@ def pixelate(image, pixel_size=10):
 
 
 # Load the YOLOv8 model
-model = YOLO('./models/yolov8n-face.pt')
+model = YOLO('../models/yolov8n-face.pt')
 
 # Open the video
-video_path = "./data/Tehran_TestMedia/SharifSampleVideo.mp4"
+video_path = "../data/Tehran_TestMedia/SharifSampleVideo.mp4"
 cap = cv2.VideoCapture(video_path)
 
 # Get video properties

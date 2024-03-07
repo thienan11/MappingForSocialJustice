@@ -3,10 +3,10 @@ import torch
 from ultralytics import YOLO
 
 # Load the YOLOv8 model
-model = YOLO('./models/yolov8n-face.pt')
+model = YOLO('../models/yolov8n-face.pt')
 
 # Open the image
-path = "./data/Tehran_TestMedia/su001_photo.jpg"
+path = "../data/Tehran_TestMedia/su001_photo.jpg"
 img = cv2.imread(path)
 
 # Perform inference
