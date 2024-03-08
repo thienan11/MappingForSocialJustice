@@ -50,6 +50,8 @@ YOLOv8 model currently produces the best results. The script utilizes OpenCV for
 
   - manipulate image pixels randomly
 
+  - do different filtering for different frames (pick the frames randomly)
+
   - eliminate number of frames to increase the protection of identity of individual without destroying their story (every 3 frame eliminated)
 
 - Get image/video information:
