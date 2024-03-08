@@ -4,6 +4,7 @@ from ultralytics import YOLO
 import tempfile
 import argparse
 import numpy as np
+import random
 
 
 # Determine the codec based on file extension
@@ -21,13 +22,26 @@ def get_codec(filename):
 
 # Apply a strong pixelation effect to a region of the image.
 def apply_pixelation(image, xmin, ymin, xmax, ymax, pixel_size=5):
+  # roi = image[ymin:ymax, xmin:xmax]
+  # height, width = roi.shape[:2]
+  # # Resize input to "pixelated" size with a very low resolution
+  # temp_image = cv2.resize(roi, (pixel_size, pixel_size), interpolation=cv2.INTER_LINEAR)
+  # # Scale back to original size
+  # pixelated_image = cv2.resize(temp_image, (width, height), interpolation=cv2.INTER_NEAREST)
+  # image[ymin:ymax, xmin:xmax] = pixelated_image
+
+  # Generate a random pixel size for pixelation, ensuring it's at least 1
+  pixel_size = np.random.randint(1, 10)  # Adjust the range as needed
+
   roi = image[ymin:ymax, xmin:xmax]
   height, width = roi.shape[:2]
-  # Resize input to "pixelated" size with a very low resolution
-  temp_image = cv2.resize(roi, (pixel_size, pixel_size), interpolation=cv2.INTER_LINEAR)
-  # Scale back to original size
-  pixelated_image = cv2.resize(temp_image, (width, height), interpolation=cv2.INTER_NEAREST)
-  image[ymin:ymax, xmin:xmax] = pixelated_image
+  # Check if the region of interest is too small to be pixelated further
+  if height > 0 and width > 0:
+      # Resize input to "pixelated" size with a very low resolution
+      temp_image = cv2.resize(roi, (pixel_size, pixel_size), interpolation=cv2.INTER_LINEAR)
+      # Scale back to original size
+      pixelated_image = cv2.resize(temp_image, (width, height), interpolation=cv2.INTER_NEAREST)
+      image[ymin:ymax, xmin:xmax] = pixelated_image
 
 
 # Processing and adding blur to images
@@ -65,18 +79,24 @@ def process_video(model, input_path, output_path):
   # Get video properties
   frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
   frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-  # frame_rate = int(cap.get(cv2.CAP_PROP_FPS))
+  frame_rate = int(cap.get(cv2.CAP_PROP_FPS))
 
   # fourcc = cv2.VideoWriter_fourcc(*'MP4V')
   # out = cv2.VideoWriter(output_path, fourcc, frame_rate, (frame_width, frame_height))
   codec = get_codec(output_path)
-  out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*codec), 20.0, (frame_width, frame_height))
+  out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*codec), frame_rate, (frame_width, frame_height)) # frame_rate = 20?
 
+  frame_count = 0
   while True:
     ret, frame = cap.read()
     if not ret:
       break
     
+    # Skip every 3rd frame
+    if frame_count % 3 == 0:
+        frame_count += 1
+        continue
+      
     # Save the frame to a temporary file
     with tempfile.NamedTemporaryFile(suffix='.jpg') as tmpfile:
       cv2.imwrite(tmpfile.name, frame)
@@ -97,6 +117,7 @@ def process_video(model, input_path, output_path):
 
             apply_pixelation(frame, xmin, ymin, xmax, ymax)
 
+      frame_count += 1
       out.write(frame)
 
   cap.release()
