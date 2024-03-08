@@ -1,4 +1,4 @@
-# MappingSocialJustice
+# MappingForSocialJustice
 
 A Repository for the "Mapping as an Agent for Change: Empowering Social Justice Initiatives" research project.
 
@@ -8,13 +8,7 @@ The face_blurring directory contains scripts for applying face blurring to image
 
 ## Requirements
 
-To run a script, you will need Python 3.x and the following dependencies:
-
-- opencv-python
-- torch
-- ultralytics
-
-These dependencies can be installed through the `requirements.txt` file.
+To run a script, you will need Python 3.x and certain dependencies, which can be installed through the `requirements.txt` file.
 
 ## Installation
 
@@ -32,7 +26,7 @@ To use the face blurring scripts, you must specify the input file path, the proc
 python <script_name.py> -m image|video -i "path/to/input/file" -o "path/to/output/file"
 ```
 
-## Current Implementation
+## Current Implementation for Face Blurring
 
 Currently exploring two models, [RetinaFace](https://github.com/serengil/retinaface?tab=readme-ov-file) and [YOLO](https://github.com/derronqi/yolov8-face) (particularly YOLOv8).
 
