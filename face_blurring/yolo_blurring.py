@@ -34,14 +34,20 @@ def apply_pixelation(image, xmin, ymin, xmax, ymax, pixel_size=5):
 def process_image(model, input_path, output_path):
   img = cv2.imread(input_path)
   results = model(input_path, conf=0.05)
+
+  # Iterate over all tensors in the results list
   for detections in results:
     if isinstance(detections, torch.Tensor):
       for detection in detections:
         xmin, ymin, xmax, ymax, conf, class_id = detection
+
+        # Convert coordinates to integers
         xmin, ymin, xmax, ymax = map(int, [xmin, ymin, xmax, ymax])
 
+        # # Select the region of interest (ROI) in the image to blur
         # roi = img[ymin:ymax, xmin:xmax]
         # blurred_roi = cv2.GaussianBlur(roi, (23, 23), 30)
+        # # Replace the original image's region with the blurred region
         # img[ymin:ymax, xmin:xmax] = blurred_roi
 
         apply_pixelation(img, xmin, ymin, xmax, ymax)
@@ -56,9 +62,10 @@ def process_video(model, input_path, output_path):
     print("Error opening video file.")
     exit()
 
+  # Get video properties
   frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
   frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-  frame_rate = int(cap.get(cv2.CAP_PROP_FPS))
+  # frame_rate = int(cap.get(cv2.CAP_PROP_FPS))
 
   # fourcc = cv2.VideoWriter_fourcc(*'MP4V')
   # out = cv2.VideoWriter(output_path, fourcc, frame_rate, (frame_width, frame_height))
@@ -68,11 +75,16 @@ def process_video(model, input_path, output_path):
   while True:
     ret, frame = cap.read()
     if not ret:
-        break
-
+      break
+    
+    # Save the frame to a temporary file
     with tempfile.NamedTemporaryFile(suffix='.jpg') as tmpfile:
       cv2.imwrite(tmpfile.name, frame)
+
+      # Perform inference using the temporary file path
       results = model(tmpfile.name, conf=0.05)
+
+      # Process the results as before, applying blurring to each detected region
       for detections in results:
         if isinstance(detections, torch.Tensor):
           for detection in detections:
@@ -94,8 +106,8 @@ def process_video(model, input_path, output_path):
 # Run program
 if __name__ == "__main__":
   parser = argparse.ArgumentParser(description="Add face blurring to images or videos with YOLOv8 model.")
-  parser.add_argument("-i", "--input", required=True, help="Input file path")
   parser.add_argument("-m", "--mode", required=True, choices=["image", "video"], help="Processing mode: image or video")
+  parser.add_argument("-i", "--input", required=True, help="Input file path")
   parser.add_argument("-o", "--output", required=True, help="Output file path")
   # parser.add_argument("--model", required=True, help="Path to the YOLO model")
 
