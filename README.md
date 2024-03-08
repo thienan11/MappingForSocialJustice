@@ -34,6 +34,8 @@ python <script_name.py> -m image|video -i "path/to/input/file" -o "path/to/outpu
 
 ## Current Implementation
 
+Currently exploring two models, [RetinaFace](https://github.com/serengil/retinaface?tab=readme-ov-file) and [YOLO](https://github.com/derronqi/yolov8-face) (particularly YOLOv8).
+
 YOLOv8 model currently produces the best results. The script utilizes OpenCV for image and video processing, along with PyTorch and the Ultralytics YOLO package for face detection. Here's a brief overview of its operation:
 
 - For images, it reads the specified file, detects faces using the YOLOv8 model, applies pixelation to each detected face, and saves the result to the specified output file.
@@ -41,6 +43,8 @@ YOLOv8 model currently produces the best results. The script utilizes OpenCV for
 - For videos, it processes each frame in the same manner as images, then compiles the frames back into a video file with the original dimensions and frame rate.
 
 - Faces are detected with a low confidence threshold to ensure broad coverage, and a pixelation effect is applied to enhance privacy while maintaining the context of the image or video.
+
+Documentation for YOLOv8 can be found here: https://docs.ultralytics.com/modes/predict/
 
 ## Need to Work On
 
@@ -57,3 +61,5 @@ YOLOv8 model currently produces the best results. The script utilizes OpenCV for
 - Get image/video information:
 
   - Check for detail information that may be hidden in jpg files or mp4 and mov
+
+- Explore which YOLO models is the best
