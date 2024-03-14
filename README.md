@@ -4,7 +4,8 @@ A Repository for the "Mapping as an Agent for Change: Empowering Social Justice 
 
 ## Overview
 
-The face_blurring directory contains scripts for applying face blurring to images or videos. There are two models being used, RetinaFace and YOLOv8.
+The main focus right now is applying a layer of security to videos by adding protective face blurring.
+- The face_blurring directory contains scripts for applying face blurring to images or videos. There are two models being used, RetinaFace and YOLOv8.
 
 ## Requirements
 
@@ -20,7 +21,7 @@ pip install -r requirements.txt
 
 ## Usage
 
-To use the face blurring scripts, you must specify the input file path, the processing mode (image or video), and the output file path. Here is how you can run the script from the command line:
+To use the face blurring scripts (`yolo_blurring.py` or `retina_face_blurring.py`), you must specify the input file path, the processing mode (image or video), and the output file path. Here is how you can run the script from the command line:
 
 ```bash
 python <script_name.py> -m image|video -i "path/to/input/file" -o "path/to/output/file"
