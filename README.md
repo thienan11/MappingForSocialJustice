@@ -4,7 +4,7 @@ A Repository for the "Mapping as an Agent for Change: Empowering Social Justice 
 
 ## Overview
 
-The main focus right now is applying a layer of security to videos by adding protective face blurring.
+The main focus right now is applying a layer of security to images/videos by adding protective face blurring.
 - The face_blurring directory contains scripts for applying face blurring to images or videos. There are two models being used, RetinaFace and YOLOv8.
 
 ## Requirements
@@ -13,7 +13,10 @@ To run a script, you will need Python 3.x and certain dependencies, which can be
 
 ## Installation
 
-Clone the repository or download the files and install the required dependencies by running the following command in your terminal:
+1. Clone the repository or download the files to your local machine.
+2. Open your terminal or command prompt.
+3. Navigate to the directory where the requirements.txt file is located.
+4. Run the following command to install the required dependencies:
 
 ```bash
 pip install -r requirements.txt
