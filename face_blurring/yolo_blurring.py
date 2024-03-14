@@ -22,14 +22,17 @@ def get_codec(filename):
 
 # Apply a strong pixelation effect to a region of the image.
 def apply_pixelation(image, xmin, ymin, xmax, ymax, pixel_size=5):
-  # roi = image[ymin:ymax, xmin:xmax]
-  # height, width = roi.shape[:2]
-  # # Resize input to "pixelated" size with a very low resolution
-  # temp_image = cv2.resize(roi, (pixel_size, pixel_size), interpolation=cv2.INTER_LINEAR)
-  # # Scale back to original size
-  # pixelated_image = cv2.resize(temp_image, (width, height), interpolation=cv2.INTER_NEAREST)
-  # image[ymin:ymax, xmin:xmax] = pixelated_image
+  roi = image[ymin:ymax, xmin:xmax]
+  height, width = roi.shape[:2]
+  # Resize input to "pixelated" size with a very low resolution
+  temp_image = cv2.resize(roi, (pixel_size, pixel_size), interpolation=cv2.INTER_LINEAR)
+  # Scale back to original size
+  pixelated_image = cv2.resize(temp_image, (width, height), interpolation=cv2.INTER_NEAREST)
+  image[ymin:ymax, xmin:xmax] = pixelated_image
 
+
+# Randomize pixels in face region of the image.
+def randomize_pixels(image, xmin, ymin, xmax, ymax, pixel_size=5):
   # Generate a random pixel size for pixelation, ensuring it's at least 1
   pixel_size = np.random.randint(1, 10)  # Adjust the range as needed
 
@@ -116,6 +119,7 @@ def process_video(model, input_path, output_path):
             # frame[ymin:ymax, xmin:xmax] = blurred_roi
 
             apply_pixelation(frame, xmin, ymin, xmax, ymax)
+            # randomize_pixels(frame, xmin, ymin, xmax, ymax)
 
       frame_count += 1
       out.write(frame)
