@@ -5,6 +5,7 @@ A Repository for the "Mapping as an Agent for Change: Empowering Social Justice 
 ## Overview
 
 The main focus right now is applying a layer of security to images/videos by adding protective face blurring.
+
 - The face_blurring directory contains scripts for applying face blurring to images or videos. There are two models being used, RetinaFace and YOLOv8.
 
 ## Requirements
@@ -44,20 +45,18 @@ YOLOv8 model currently produces the best results. The script utilizes OpenCV for
 
 Documentation for YOLOv8 can be found here: https://docs.ultralytics.com/modes/predict/
 
-## Need to Work On
+## TODO
 
 - Improving security through better blurring techniques:
 
-  - masking
+  - [ ] masking
 
-  - manipulate image pixels randomly
+  - [x] manipulate image pixels randomly
 
-  - do different filtering for different frames (pick the frames randomly)
+  - [ ] do different filtering for different frames (pick the frames randomly)
 
-  - eliminate number of frames to increase the protection of identity of individual without destroying their story (every 3 frame eliminated)
+  - [x] eliminate number of frames to increase the protection of identity of individual without destroying their story (every 3 frame eliminated)
 
-- Get image/video information:
+- [ ] Check for detail information that may be hidden in jpg files or mp4 and mov
 
-  - Check for detail information that may be hidden in jpg files or mp4 and mov
-
-- Explore which YOLO models is the best
+- [ ] Explore which YOLO models is the best
