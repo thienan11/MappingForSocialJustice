@@ -33,15 +33,15 @@ python <script_name.py> -m image|video -i "path/to/input/file" -o "path/to/outpu
 
 ## Current Implementation for Face Blurring
 
-Currently exploring two models, [RetinaFace](https://github.com/serengil/retinaface?tab=readme-ov-file) and [YOLO](https://github.com/derronqi/yolov8-face) (particularly YOLOv8).
+Currently exploring two models, [RetinaFace](https://github.com/serengil/retinaface?tab=readme-ov-file) and [YOLO](https://github.com/ultralytics/ultralytics) (particularly YOLOv8).
 
-YOLOv8 model currently produces the best results. The script utilizes OpenCV for image and video processing, along with PyTorch and the Ultralytics YOLO package for face detection. Here's a brief overview of its operation:
+YOLOv8 model currently produces the best results (fast & lightweight too). The script utilizes OpenCV for image and video processing, along with PyTorch and the Ultralytics YOLO package for face detection. Here's a brief overview of its operation:
 
 - For images, it reads the specified file, detects faces using the YOLOv8 model, applies pixelation to each detected face, and saves the result to the specified output file.
 
 - For videos, it processes each frame in the same manner as images, then compiles the frames back into a video file with the original dimensions and frame rate.
 
-- Faces are detected with a low confidence threshold to ensure broad coverage, and a pixelation effect is applied to enhance privacy while maintaining the context of the image or video.
+- Faces are detected with a low confidence threshold to ensure that low quality, hard to see faces are detected. Two pixelation effects are being tested (normal pixelation & randomized pixelation in face region). The goal is to enhance privacy while maintaining the context of the image or video.
 
 Documentation for YOLOv8 can be found here: https://docs.ultralytics.com/modes/predict/
 
