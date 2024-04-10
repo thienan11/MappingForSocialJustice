@@ -1,6 +1,6 @@
 # MappingForSocialJustice
 
-A Repository for the "Mapping as an Agent for Change: Empowering Social Justice Initiatives" research project.
+A repository for the "Mapping as an Agent for Change: Empowering Social Justice Initiatives" research project.
 
 ## Overview
 
@@ -14,14 +14,15 @@ To run a script, you will need Python 3.x and certain dependencies, which can be
 
 ## Installation
 
-1. Clone the repository or download the files to your local machine.
-2. Open your terminal or command prompt.
-3. Navigate to the directory where the requirements.txt file is located.
-4. Run the following command to install the required dependencies:
+1. Clone the repository or download the files to your local machine. 
+2. Navigate to the project directory.
+3. Before moving on, it's recommended to create a virtual environment for the project to isolate its dependencies. This can be done through a library like [virtualenv](https://pypi.org/project/virtualenv/) or simply running `python3 -m venv env_name` in your terminal. Make sure to activate it after creating it.
+4. Locate `requirements.txt` file, which lists the dependencies needed for the project.
+5. To install the required dependencies, run the following command in your terminal:
 
 ```bash
-pip install -r requirements.txt
-```
+pip3 install -r requirements.txt
+``` 
 
 ## Usage
 
@@ -57,6 +58,6 @@ Documentation for YOLOv8 can be found here: https://docs.ultralytics.com/modes/p
 
   - [x] eliminate number of frames to increase the protection of identity of individual without destroying their story (every 3 frame eliminated)
 
-- [ ] Check for detail information that may be hidden in jpg files or mp4 and mov
-
 - [ ] Explore which YOLO models is the best
+
+- [ ] Refactoring code structure

@@ -1,2 +1,2 @@
-retina-face
+retina-face==0.0.16
 ultralytics==8.0.0
