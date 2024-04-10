@@ -3,8 +3,6 @@ import torch
 from ultralytics import YOLO
 import tempfile
 import argparse
-import numpy as np
-import random
 
 from blurring_effects import *
 from get_codec import get_codec_from_file
@@ -30,7 +28,8 @@ def process_image(model, input_path, output_path):
                 # # Replace the original image's region with the blurred region
                 # img[ymin:ymax, xmin:xmax] = blurred_roi
 
-                apply_pixelation(img, xmin, ymin, xmax, ymax)
+                # apply_pixelation(img, xmin, ymin, xmax, ymax)
+                apply_blur_and_pixelation(img, xmin, ymin, xmax, ymax)
 
     cv2.imwrite(output_path, img)
 
@@ -81,8 +80,9 @@ def process_video(model, input_path, output_path):
                         # blurred_roi = cv2.GaussianBlur(roi, (23, 23), 30)
                         # frame[ymin:ymax, xmin:xmax] = blurred_roi
 
-                        apply_pixelation(frame, xmin, ymin, xmax, ymax)
+                        # apply_pixelation(frame, xmin, ymin, xmax, ymax)
                         # randomize_pixels(frame, xmin, ymin, xmax, ymax)
+                        apply_blur_and_pixelation(frame, xmin, ymin, xmax, ymax)
 
             frame_count += 1
             out.write(frame)
