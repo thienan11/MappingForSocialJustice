@@ -1,10 +1,10 @@
-# Mapping for Social Justice - Face Blurring Program
+# Mapping for Social Justice - Face Blurring
 
 A repository for the face blurring functionality of the "Mapping as an Agent for Change: Empowering Social Justice Initiatives" research project.
 
 ## Overview
 
-This part of the project focuses on applying a layer of security to images/videos by adding protective face blurring.
+This phase of the project concentrates on enhancing the security of images and videos by implementing protective face blurring. This functionality will ultimately be integrated and automated within the video archiving platform, ensuring that face blurring is applied to every uploaded image or video.
 
 The face_blurring directory contains scripts for applying face blurring to images or videos. There are two models being used, RetinaFace and YOLOv8.
 
@@ -63,3 +63,5 @@ Documentation for YOLOv8 can be found here: https://docs.ultralytics.com/modes/p
 - [ ] Explore which YOLO models is the best
 
 - [x] Refactoring code structure
+
+- [ ] Automate face blurring of images/videos
