@@ -1,7 +1,10 @@
 import cv2
 import numpy as np
+from skimage.segmentation import slic
+from skimage.util import img_as_float
 
-# Apply a strong pixelation effect to a region of the image.
+
+# (YOLO) Apply a strong pixelation effect to a region of the image. 
 def apply_pixelation(image, xmin, ymin, xmax, ymax, pixel_size=5):
     roi = image[ymin:ymax, xmin:xmax]
     height, width = roi.shape[:2]
@@ -12,7 +15,7 @@ def apply_pixelation(image, xmin, ymin, xmax, ymax, pixel_size=5):
     image[ymin:ymax, xmin:xmax] = pixelated_image
 
 
-# Randomize pixels in face region of the image.
+# (YOLO) Randomize pixels in face region of the image.
 def randomize_pixels(image, xmin, ymin, xmax, ymax, pixel_size=5):
     # Generate a random pixel size for pixelation, ensuring it's at least 1
     pixel_size = np.random.randint(1, 10)  # Adjust the range as needed
@@ -28,7 +31,7 @@ def randomize_pixels(image, xmin, ymin, xmax, ymax, pixel_size=5):
         image[ymin:ymax, xmin:xmax] = pixelated_image
 
 
-# for retina face
+# (RetinaFace)
 def blur_and_pixelate_face_region(frame, facial_area, pixelation_size=5, blur_strength=(101, 101)):
     x, y, w, h = facial_area
     # Extract face region
@@ -42,7 +45,7 @@ def blur_and_pixelate_face_region(frame, facial_area, pixelation_size=5, blur_st
     frame[y:h, x:w] = pixelated_face
     return frame
 
-# for yolo
+# (YOLO)
 def apply_blur_and_pixelation(image, xmin, ymin, xmax, ymax, pixelation_size=10, blur_strength=(101, 101)):
     # Extract the region of interest
     face_region = image[ymin:ymax, xmin:xmax]
@@ -57,3 +60,18 @@ def apply_blur_and_pixelation(image, xmin, ymin, xmax, ymax, pixelation_size=10,
 
     # Replace the original region with the pixelated blurred region
     image[ymin:ymax, xmin:xmax] = pixelated_face
+
+
+def apply_superpixel_blurring(image, xmin, ymin, xmax, ymax, n_segments=100, sigma=5):
+    face_region = img_as_float(image[ymin:ymax, xmin:xmax])
+    segments = slic(face_region, n_segments=n_segments, sigma=sigma)
+    
+    for segment_value in np.unique(segments):
+        mask = segments == segment_value
+        color_mean = np.mean(face_region[mask], axis=0)
+        face_region[mask] = color_mean
+
+    image[ymin:ymax, xmin:xmax] = (255 * face_region).astype(np.uint8)
+    return image
+
+
