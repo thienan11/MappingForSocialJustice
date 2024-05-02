@@ -1,6 +1,6 @@
 # Mapping for Social Justice - Face Blurring
 
-This directory contains the face blurring functionality of the "Mapping as an Agent for Change: Empowering Social Justice Initiatives" research project.
+This directory contains the face blurring functionality of the research project.
 
 ## Overview
 
@@ -10,7 +10,7 @@ The scripts directory contains python files for applying face blurring to images
 
 ## Requirements
 
-To run a script, you will need Python 3.x and certain dependencies, which can be installed through the `requirements.txt` file.
+To run a script, you will need to use Python 3.11.7 or below and certain dependencies, which can be installed through the `requirements.txt` file.
 
 ## Installation
 
