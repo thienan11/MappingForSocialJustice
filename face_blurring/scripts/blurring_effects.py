@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from skimage.segmentation import slic
 from skimage.util import img_as_float
+from scipy.ndimage.morphology import binary_dilation
 
 
 # (YOLO) Apply a strong pixelation effect to a region of the image. 
@@ -62,16 +63,28 @@ def apply_blur_and_pixelation(image, xmin, ymin, xmax, ymax, pixelation_size=10,
     image[ymin:ymax, xmin:xmax] = pixelated_face
 
 
-def apply_superpixel_blurring(image, xmin, ymin, xmax, ymax, n_segments=100, sigma=5):
+# def apply_superpixel_blurring(image, xmin, ymin, xmax, ymax, n_segments=100, sigma=5):
+#     face_region = img_as_float(image[ymin:ymax, xmin:xmax])
+#     segments = slic(face_region, n_segments=n_segments, sigma=sigma)
+    
+#     for segment_value in np.unique(segments):
+#         mask = segments == segment_value
+#         color_mean = np.mean(face_region[mask], axis=0)
+#         face_region[mask] = color_mean
+
+#     image[ymin:ymax, xmin:xmax] = (255 * face_region).astype(np.uint8)
+#     return image
+
+def apply_superpixel_blurring(image, xmin, ymin, xmax, ymax, n_segments=100, sigma=5, dilation_radius=10):
     face_region = img_as_float(image[ymin:ymax, xmin:xmax])
     segments = slic(face_region, n_segments=n_segments, sigma=sigma)
     
     for segment_value in np.unique(segments):
         mask = segments == segment_value
-        color_mean = np.mean(face_region[mask], axis=0)
+        # Dilate the mask to increase the area for blurring
+        dilated_mask = binary_dilation(mask, structure=np.ones((dilation_radius, dilation_radius)))
+        color_mean = np.mean(face_region[dilated_mask], axis=0)
         face_region[mask] = color_mean
 
     image[ymin:ymax, xmin:xmax] = (255 * face_region).astype(np.uint8)
     return image
-
-

@@ -1,12 +1,12 @@
 # Mapping for Social Justice - Face Blurring
 
-A repository for the face blurring functionality of the "Mapping as an Agent for Change: Empowering Social Justice Initiatives" research project.
+This directory contains the face blurring functionality of the "Mapping as an Agent for Change: Empowering Social Justice Initiatives" research project.
 
 ## Overview
 
 This phase of the project concentrates on enhancing the security of images and videos by implementing protective face blurring. This functionality will ultimately be integrated and automated within the video archiving platform, ensuring that face blurring is applied to every uploaded image or video.
 
-The face_blurring directory contains scripts for applying face blurring to images or videos. There are two models being used, RetinaFace and YOLOv8.
+The scripts directory contains python files for applying face blurring to images or videos. There are two models being used, RetinaFace and YOLOv8.
 
 ## Requirements
 
@@ -15,7 +15,7 @@ To run a script, you will need Python 3.x and certain dependencies, which can be
 ## Installation
 
 1. Clone the repository or download the files to your local machine. 
-2. Navigate to the project directory.
+2. Navigate to the this directory (face_blurring).
 3. Before moving on, it's recommended to create a virtual environment for the project to isolate its dependencies. This can be done through a library like [virtualenv](https://pypi.org/project/virtualenv/) or simply running `python3 -m venv env_name` in your terminal. Make sure to activate it after creating it.
 4. Locate `requirements.txt` file, which lists the dependencies needed for the project.
 5. To install the required dependencies, run the following command in your terminal:
@@ -50,9 +50,9 @@ Documentation for YOLOv8 can be found here: https://docs.ultralytics.com/modes/p
 
 - Improving security through better blurring techniques:
 
-  - [ ] masking
+  - [x] masking (obscures image)
 
-  - [x] manipulate image pixels randomly
+  - [x] manipulate image pixels randomly (makes videos hard to watch)
 
   - [ ] do different filtering for different frames (pick the frames randomly)
 
