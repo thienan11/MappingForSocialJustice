@@ -18,7 +18,12 @@ h1 {
 .layout-container {
   display: flex;
   width: 100%;
-  height: calc(100% - 40px); /* Adjust based on padding */
+  /* height: calc(100% - 40px); Adjust based on padding */
+  height: 100%;
+}
+
+.search-box {
+  margin-bottom: 20px;
 }
 
 /* Styles for the sidebar */

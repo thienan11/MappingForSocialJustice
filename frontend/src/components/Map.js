@@ -9,6 +9,8 @@ mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
 const Map = () => {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
+  const [value, setValue] = React.useState("");
+
   const [lng, setLng] = useState(-120.6556);
   const [lat, setLat] = useState(35.2901);
   const [zoom, setZoom] = useState(12);
@@ -25,10 +27,10 @@ const Map = () => {
 
   useEffect(() => {
     const map = new mapboxgl.Map({
-        container: mapContainerRef.current,
-        style: mapStyle,
-        center: [lng, lat],
-        zoom: zoom
+      container: mapContainerRef.current,
+      style: mapStyle,
+      center: [lng, lat],
+      zoom: zoom
     });
 
     map.on('load', () => {
@@ -37,13 +39,13 @@ const Map = () => {
 
     map.addControl(new mapboxgl.NavigationControl(), 'top-right');
     map.on('move', () => {
-        const center = map.getCenter();
-        setLng(center.lng);
-        setLat(center.lat);
-        setZoom(map.getZoom());
-        if (markerVisible && markerRef.current) {
-            markerRef.current.setLngLat([center.lng, center.lat]);
-        }
+      const center = map.getCenter();
+      setLng(center.lng);
+      setLat(center.lat);
+      setZoom(map.getZoom());
+      if (markerVisible && markerRef.current) {
+        markerRef.current.setLngLat([center.lng, center.lat]);
+      }
     });
 
     mapRef.current = map;
@@ -57,32 +59,32 @@ const Map = () => {
 
   useEffect(() => {
     if (mapLoaded) {
-        axios.get('http://localhost:4000/media')
-            .then(response => {
-                const mediaItems = response.data;
-                mediaItems.forEach(item => {
-                    const { lat, lng, title, description, url, mediaType } = item;
+      axios.get('http://localhost:4000/media')
+        .then(response => {
+          const mediaItems = response.data;
+          mediaItems.forEach(item => {
+            const { lat, lng, title, description, url, mediaType } = item;
 
-                    // Create a popup with a button to view the content
-                    const popup = new mapboxgl.Popup({ offset: 25 })
-                        .setHTML(`<h3>${title}</h3><p>${description}</p><button onclick="window.showContent('${url}', '${title}', '${description}')">View Content</button>`);
+            // Create a popup with a button to view the content
+            const popup = new mapboxgl.Popup({ offset: 25 })
+              .setHTML(`<h3>${title}</h3><p>${description}</p><button onclick="window.showContent('${url}', '${title}', '${description}')">View Content</button>`);
 
-                    // Create and add the marker
-                    new mapboxgl.Marker()
-                        .setLngLat([parseFloat(lng), parseFloat(lat)])
-                        .setPopup(popup)
-                        .addTo(mapRef.current);
-                });
-            })
-            .catch(error => console.error('Error fetching media items:', error));
+            // Create and add the marker
+            new mapboxgl.Marker()
+              .setLngLat([parseFloat(lng), parseFloat(lat)])
+              .setPopup(popup)
+              .addTo(mapRef.current);
+          });
+        })
+        .catch(error => console.error('Error fetching media items:', error));
     }
   }, [mapLoaded]);
 
   useEffect(() => {
       navigator.geolocation.getCurrentPosition(position => {
-          setLng(position.coords.longitude);
-          setLat(position.coords.latitude);
-          setZoom(14);
+        setLng(position.coords.longitude);
+        setLat(position.coords.latitude);
+        setZoom(14);
       });
   }, []);
 
@@ -95,7 +97,7 @@ const Map = () => {
     e.preventDefault();
     const formData = new FormData();
     if (file) {
-        formData.append('media', file, file.name);
+      formData.append('media', file, file.name);
     }
     formData.append('title', title);
     formData.append('description', description);
@@ -104,105 +106,112 @@ const Map = () => {
 
     try {
         const response = await axios.post('http://localhost:4000/upload', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            }
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
         });
-        console.log('Upload successful', response.data);
-        alert('File uploaded successfully');
+      console.log('Upload successful', response.data);
+      alert('File uploaded successfully');
     } catch (error) {
-        console.error('Error uploading file', error);
-        alert('Error uploading file');
+      console.error('Error uploading file', error);
+      alert('Error uploading file');
     }
   };
 
   const toggleMarker = () => {
     if (!markerRef.current) {
-        // Create a new marker if it doesn't exist
-        markerRef.current = new mapboxgl.Marker({
-            draggable: true,
-            color: "#FF0000"
-        })
-        .setLngLat([lng, lat])
-        .addTo(mapRef.current)
-        .on('dragend', onDragEnd); // Add dragend event handler
+      // Create a new marker if it doesn't exist
+      markerRef.current = new mapboxgl.Marker({
+        draggable: true,
+        color: "#FF0000"
+      })
+      .setLngLat([lng, lat])
+      .addTo(mapRef.current)
+      .on('dragend', onDragEnd); // Add dragend event handler
     }
 
     if (markerVisible) {
-        markerRef.current.remove();
-        markerRef.current = null;
+      markerRef.current.remove();
+      markerRef.current = null;
     } else {
-        markerRef.current.addTo(mapRef.current);
+      markerRef.current.addTo(mapRef.current);
     }
     setMarkerVisible(!markerVisible);
   };
   
   // Handle dragend event
   const onDragEnd = () => {
-      if (markerRef.current) {
-          const lngLat = markerRef.current.getLngLat();
-          setLng(lngLat.lng);
-          setLat(lngLat.lat);
-          setSelectedLocation({ lng: lngLat.lng, lat: lngLat.lat });
-      }
+    if (markerRef.current) {
+      const lngLat = markerRef.current.getLngLat();
+      setLng(lngLat.lng);
+      setLat(lngLat.lat);
+      setSelectedLocation({ lng: lngLat.lng, lat: lngLat.lat });
+    }
   };
 
   const toggleMapStyle = () => {
-      const style = mapStyle === 'mapbox://styles/mapbox/standard'
-          ? 'mapbox://styles/mapbox/satellite-v9'
-          : 'mapbox://styles/mapbox/standard';
-      setMapStyle(style);
+    const style = mapStyle === 'mapbox://styles/mapbox/standard'
+      ? 'mapbox://styles/mapbox/satellite-v9'
+      : 'mapbox://styles/mapbox/standard';
+    setMapStyle(style);
   };
 
   // Function to show content in the component
   const showContent = (url, title, description) => {
-      setSelectedContent({ url, title, description });
+    setSelectedContent({ url, title, description });
   };
 
   // Add showContent function to the global window object to make it accessible in the popup
   useEffect(() => {
-      window.showContent = showContent;
+    window.showContent = showContent;
   }, []);
 
   return (
-      <div className='layout-container'>
-          <ContentDisplay
-              url={selectedContent.url}
-              title={selectedContent.title}
-              description={selectedContent.description}
-              onClose={() => setSelectedContent({ url: null, title: '', description: '' })}
-          />
-          <div className='sidebarStyle'>
-              <div>Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}</div>
-              <button onClick={toggleMarker}>
-                  {markerVisible ? "Hide Marker" : "Place Marker"}
-              </button>
-              <SearchBox
-                  accessToken={mapboxgl.accessToken}
-                  map={mapRef.current}
-                  onResult={(result) => {
-                    const { center } = result.result;
-                    setSelectedLocation({
-                        lng: center[0].toFixed(12),
-                        lat: center[1].toFixed(12)
-                    });
-                }}
-              >
-                  <input
-                      placeholder="Search for places"
-                      onChange={(e) => {}}
-                  />
-              </SearchBox>
-              <form onSubmit={handleSubmit}>
-                  <input className="in" type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
-                  <input className="in" type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
-                  <input type="file" onChange={handleFileChange} />
-                  <button type="submit">Upload</button>
-              </form>
-              <button onClick={toggleMapStyle}>Toggle Map Style</button>
-          </div>
-          <div className='map-container' ref={mapContainerRef} />
+    <div className='layout-container'>
+      <ContentDisplay
+        url={selectedContent.url}
+        title={selectedContent.title}
+        description={selectedContent.description}
+        onClose={() => setSelectedContent({ url: null, title: '', description: '' })}
+      />
+      <div className='sidebarStyle'>
+        <p>Longitude: {lng}</p>
+        <p>Latitude: {lat}</p>
+        <p>Zoom: {zoom}</p>
+          {/* <div>Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}</div> */}
+        <button onClick={toggleMarker}>
+          {markerVisible ? "Hide Marker" : "Place Marker"}
+        </button>
+        <form className="search-box">
+          <SearchBox
+            accessToken={mapboxgl.accessToken}
+            map={mapRef.current}
+            onResult={(result) => {
+              const { center } = result.result;
+              setSelectedLocation({
+                  lng: center[0].toFixed(12),
+                  lat: center[1].toFixed(12)
+              });
+            }}
+            value={value}
+          >
+            <input
+              placeholder="enter an address"
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+            />
+          </SearchBox>
+        </form>
+        <form onSubmit={handleSubmit}>
+          <input className="in" type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
+          <input className="in" type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
+          <input type="file" onChange={handleFileChange} />
+          <button type="submit">Upload</button>
+        </form>
+        <button onClick={toggleMapStyle}>Toggle Map Style</button>
       </div>
+      <div className='map-container' ref={mapContainerRef} />
+    </div>
   );
 };
 
