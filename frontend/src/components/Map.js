@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { SearchBox } from '@mapbox/search-js-react';
 import axios from 'axios';
+import ContentDisplay from './ContentDisplay';
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
 
@@ -17,6 +18,7 @@ const Map = () => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [mapLoaded, setMapLoaded] = useState(false);
+  const [selectedContent, setSelectedContent] = useState({ url: null, title: '', description: '' });
 
   useEffect(() => {
       const map = new mapboxgl.Map({
@@ -53,12 +55,9 @@ const Map = () => {
                 mediaItems.forEach(item => {
                     const { lat, lng, title, description, url, mediaType } = item;
 
-                    /// Create a hyperlink for the media
-                    let linkHTML = `<a href="${url}" target="_blank">View Content</a>`;
-
-                    // Create a popup with the media link
+                    // Create a popup with a button to view the content
                     const popup = new mapboxgl.Popup({ offset: 25 })
-                        .setHTML(`<h3>${title}</h3><p>${description}</p>${linkHTML}`);
+                        .setHTML(`<h3>${title}</h3><p>${description}</p><button onclick="window.showContent('${url}', '${title}', '${description}')">View Content</button>`);
 
                     // Create and add the marker
                     new mapboxgl.Marker()
@@ -70,7 +69,7 @@ const Map = () => {
             .catch(error => console.error('Error fetching media items:', error));
     }
   }, [mapLoaded]);
-  
+
   useEffect(() => {
       navigator.geolocation.getCurrentPosition(position => {
           setLng(position.coords.longitude);
@@ -107,7 +106,6 @@ const Map = () => {
     }
   };
 
-
   const toggleMapStyle = () => {
       const style = mapStyle === 'mapbox://styles/mapbox/standard'
           ? 'mapbox://styles/mapbox/satellite-v9'
@@ -115,8 +113,24 @@ const Map = () => {
       setMapStyle(style);
   };
 
+  // Function to show content in the component
+  const showContent = (url, title, description) => {
+      setSelectedContent({ url, title, description });
+  };
+
+  // Add showContent function to the global window object to make it accessible in the popup
+  useEffect(() => {
+      window.showContent = showContent;
+  }, []);
+
   return (
       <div className='layout-container'>
+          <ContentDisplay
+              url={selectedContent.url}
+              title={selectedContent.title}
+              description={selectedContent.description}
+              onClose={() => setSelectedContent({ url: null, title: '', description: '' })}
+          />
           <div className='sidebarStyle'>
               <div>Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}</div>
               <SearchBox
