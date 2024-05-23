@@ -20,32 +20,40 @@ const Map = () => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const [selectedContent, setSelectedContent] = useState({ url: null, title: '', description: '' });
 
+  const markerRef = useRef(null); // Reference to keep track of the marker instance
+  const [markerVisible, setMarkerVisible] = useState(false); // State to control marker visibility
+
   useEffect(() => {
-      const map = new mapboxgl.Map({
-          container: mapContainerRef.current,
-          style: mapStyle,
-          center: [lng, lat],
-          zoom: zoom
-      });
+    const map = new mapboxgl.Map({
+        container: mapContainerRef.current,
+        style: mapStyle,
+        center: [lng, lat],
+        zoom: zoom
+    });
 
-      map.on('load', () => {
-        setMapLoaded(true);
-      });
+    map.on('load', () => {
+      setMapLoaded(true);
+    });
 
-      map.addControl(new mapboxgl.NavigationControl(), 'top-right');
-      map.on('move', () => {
-          const centerLng = parseFloat(map.getCenter().lng.toFixed(12));
-          const centerLat = parseFloat(map.getCenter().lat.toFixed(12));
-          const currentZoom = parseFloat(map.getZoom().toFixed(2));
-          setLng(centerLng);
-          setLat(centerLat);
-          setZoom(currentZoom);
-          setSelectedLocation({ lng: centerLng, lat: centerLat });
-      });
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    map.on('move', () => {
+        const center = map.getCenter();
+        setLng(center.lng);
+        setLat(center.lat);
+        setZoom(map.getZoom());
+        if (markerVisible && markerRef.current) {
+            markerRef.current.setLngLat([center.lng, center.lat]);
+        }
+    });
 
-      mapRef.current = map;
-      return () => map.remove();
-  }, [mapStyle]);
+    mapRef.current = map;
+    return () => {
+      if (markerRef.current) {
+        markerRef.current.remove();
+      }
+      map.remove();
+    };
+}, [mapStyle]);
 
   useEffect(() => {
     if (mapLoaded) {
@@ -101,9 +109,42 @@ const Map = () => {
             }
         });
         console.log('Upload successful', response.data);
+        alert('File uploaded successfully');
     } catch (error) {
         console.error('Error uploading file', error);
+        alert('Error uploading file');
     }
+  };
+
+  const toggleMarker = () => {
+    if (!markerRef.current) {
+        // Create a new marker if it doesn't exist
+        markerRef.current = new mapboxgl.Marker({
+            draggable: true,
+            color: "#FF0000"
+        })
+        .setLngLat([lng, lat])
+        .addTo(mapRef.current)
+        .on('dragend', onDragEnd); // Add dragend event handler
+    }
+
+    if (markerVisible) {
+        markerRef.current.remove();
+        markerRef.current = null;
+    } else {
+        markerRef.current.addTo(mapRef.current);
+    }
+    setMarkerVisible(!markerVisible);
+  };
+  
+  // Handle dragend event
+  const onDragEnd = () => {
+      if (markerRef.current) {
+          const lngLat = markerRef.current.getLngLat();
+          setLng(lngLat.lng);
+          setLat(lngLat.lat);
+          setSelectedLocation({ lng: lngLat.lng, lat: lngLat.lat });
+      }
   };
 
   const toggleMapStyle = () => {
@@ -133,6 +174,9 @@ const Map = () => {
           />
           <div className='sidebarStyle'>
               <div>Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}</div>
+              <button onClick={toggleMarker}>
+                  {markerVisible ? "Hide Marker" : "Place Marker"}
+              </button>
               <SearchBox
                   accessToken={mapboxgl.accessToken}
                   map={mapRef.current}
