@@ -46,21 +46,28 @@ YOLOv8 model currently produces the best results (fast & lightweight too). The s
 
 Documentation for YOLOv8 can be found here: https://docs.ultralytics.com/modes/predict/
 
+The yolov8 face models can be found here: https://github.com/akanametov/yolov8-face
+
 ## TODO
 
 - Improving security through better blurring techniques:
 
-  - [x] masking (obscures image)
+  - [x] masking
+    - not effective: obscures image
 
-  - [x] manipulate image pixels randomly (makes videos hard to watch)
+  - [x] manipulate image pixels randomly 
+    - not effective: makes videos hard to watch
 
-  - [ ] do different filtering for different frames (pick the frames randomly)
+  - [x] do different filtering for different frames (pick the frames randomly)
+    - can be effective but sometimes makes videos hard to watch (depending on filtering use)
 
   - [x] eliminate number of frames to increase the protection of identity of individual without destroying their story (every 3 frame eliminated)
+    - effective
 
   - [ ] Investigate algorithm to make blurring irreversible and apply it
 
 - [ ] Explore which YOLO models is the best
+  - Testing security and performance of outputs
 
 - [x] Refactoring code structure
 
