@@ -3,6 +3,7 @@ import torch
 from ultralytics import YOLO
 import tempfile
 import argparse
+import cvzone
 
 from blurring_effects import *
 from get_codec import get_codec_from_file
@@ -11,26 +12,23 @@ from get_codec import get_codec_from_file
 # Processing and adding blur to images
 def process_image(model, input_path, output_path):
     img = cv2.imread(input_path)
-    results = model(input_path, conf=0.05)
+    results = model.predict(input_path, conf=0.05)
 
-    # Iterate over all tensors in the results list
-    for detections in results:
-        if isinstance(detections, torch.Tensor):
-            for detection in detections:
-                xmin, ymin, xmax, ymax, conf, class_id = detection
+    for info in results:
+        parameters = info.boxes
+        for box in parameters:
+            xmin, ymin, xmax, ymax = box.xyxy[0]
+            xmin, ymin, xmax, ymax = map(int, [xmin, ymin, xmax, ymax])
+            # h, w = ymax - ymin, xmax - xmin
+            # cvzone.cornerRect(img, (xmin, ymin, h, w), 20, rt=0)
 
-                # Convert coordinates to integers
-                xmin, ymin, xmax, ymax = map(int, [xmin, ymin, xmax, ymax])
+            apply_blur_and_pixelation(img, xmin, ymin, xmax, ymax)
+            # randomize_pixels(img, xmin, ymin, xmax, ymax)
+            # apply_superpixel_blurring(img, xmin, ymin, xmax, ymax)
+            # combined_blurring(img, xmin, ymin, xmax, ymax)
 
-                # # Select the region of interest (ROI) in the image to blur
-                # roi = img[ymin:ymax, xmin:xmax]
-                # blurred_roi = cv2.GaussianBlur(roi, (23, 23), 30)
-                # # Replace the original image's region with the blurred region
-                # img[ymin:ymax, xmin:xmax] = blurred_roi
-
-                # apply_pixelation(img, xmin, ymin, xmax, ymax)
-                apply_blur_and_pixelation(img, xmin, ymin, xmax, ymax)
-
+    # cv2.imshow("Image", img)
+    # cv2.waitKey(0)
     cv2.imwrite(output_path, img)
 
 
@@ -102,7 +100,7 @@ def yolo_face_blurring():
 
     # Load the YOLOv8 model
     # model = YOLO(args.model)
-    model = YOLO('../models/yolov8n-face.pt')
+    model = YOLO('../models/yolov8l-face.pt')
 
     if args.mode == "image":
         process_image(model, args.input, args.output)
