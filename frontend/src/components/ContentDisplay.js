@@ -5,7 +5,7 @@ const ContentDisplay = ({ url, title, description, onClose }) => {
 
     return (
         <div className="content-display">
-            <button onClick={onClose}>Close</button>
+            <button className="form-button" onClick={onClose}>Close</button>
             <h3>{title}</h3>
             <p>{description}</p>
             {url.endsWith('.mp4') ? (
