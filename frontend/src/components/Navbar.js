@@ -1,7 +1,8 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Navbar = ({ toggleSidebar }) => {
   const navigate = useNavigate();
+  const location = useLocation();
 
   return (
     <div className="navbar">
@@ -19,7 +20,9 @@ const Navbar = ({ toggleSidebar }) => {
       </div>
 
       <div className="navbar-col">
-        <button className="toggle-sidebar-btn" onClick={toggleSidebar}>View Form</button>
+        {location.pathname === '/' && (
+          <button className="toggle-sidebar-btn" onClick={toggleSidebar}>Toggle Form</button>
+        )}
 
         <p id="auth-buttons" onClick={() => navigate("/about")}>About</p>
       

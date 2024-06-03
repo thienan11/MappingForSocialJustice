@@ -6,7 +6,7 @@ import About from './components/About';
 import Navbar from './components/Navbar';
 
 function App() {
-  const [isSidebarVisible, setIsSidebarVisible] = useState(true);
+  const [isSidebarVisible, setIsSidebarVisible] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarVisible(!isSidebarVisible);

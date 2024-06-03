@@ -162,7 +162,7 @@ a:hover {
 }
 
 /* Image styling for icons in the navbar */
-img {
+.navbar img {
   filter: brightness(0) invert(1);  /* Makes images white to match the text color */
   margin-right: 20px; /* Add margin to space out elements */
 }
