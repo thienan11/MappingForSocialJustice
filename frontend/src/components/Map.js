@@ -6,10 +6,10 @@ import ContentDisplay from './ContentDisplay';
 
 mapboxgl.accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
 
-const Map = () => {
+const Map = ({ isSidebarVisible }) => {
   const mapContainerRef = useRef(null);
   const mapRef = useRef(null);
-  const [value, setValue] = React.useState("");
+  const [value, setValue] = useState("");
 
   const [lng, setLng] = useState(-120.6556);
   const [lat, setLat] = useState(35.2901);
@@ -55,7 +55,7 @@ const Map = () => {
       }
       map.remove();
     };
-}, [mapStyle]);
+  }, [mapStyle]);
 
   useEffect(() => {
     if (mapLoaded) {
@@ -67,7 +67,7 @@ const Map = () => {
 
             // Create a popup with a button to view the content
             const popup = new mapboxgl.Popup({ offset: 25 })
-              .setHTML(`<h3>${title}</h3><p>${description}</p><button onclick="window.showContent('${url}', '${title}', '${description}')">View Content</button>`);
+              .setHTML(`<h3>${title}</h3><p>${description}</p><button class="form-button" onclick="window.showContent('${url}', '${title}', '${description}')">View Content</button>`);
 
             // Create and add the marker
             new mapboxgl.Marker()
@@ -81,17 +81,17 @@ const Map = () => {
   }, [mapLoaded]);
 
   useEffect(() => {
-      navigator.geolocation.getCurrentPosition(position => {
-        setLng(position.coords.longitude);
-        setLat(position.coords.latitude);
-        setZoom(14);
-      });
+    navigator.geolocation.getCurrentPosition(position => {
+      setLng(position.coords.longitude);
+      setLat(position.coords.latitude);
+      setZoom(14);
+    });
   }, []);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
     console.log(e.target.files[0]); // This will show you if the file is being captured
-};
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -105,11 +105,11 @@ const Map = () => {
     formData.append('lat', selectedLocation.lat);
 
     try {
-        const response = await axios.post('http://localhost:4000/upload', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
+      const response = await axios.post('http://localhost:4000/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
       console.log('Upload successful', response.data);
       alert('File uploaded successfully');
     } catch (error) {
@@ -125,9 +125,9 @@ const Map = () => {
         draggable: true,
         color: "#FF0000"
       })
-      .setLngLat([lng, lat])
-      .addTo(mapRef.current)
-      .on('dragend', onDragEnd); // Add dragend event handler
+        .setLngLat([lng, lat])
+        .addTo(mapRef.current)
+        .on('dragend', onDragEnd); // Add dragend event handler
     }
 
     if (markerVisible) {
@@ -166,6 +166,12 @@ const Map = () => {
     window.showContent = showContent;
   }, []);
 
+  useEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.resize(); // Ensure map resizes when sidebar visibility changes
+    }
+  }, [isSidebarVisible]);
+
   return (
     <div className='layout-container'>
       <ContentDisplay
@@ -174,12 +180,11 @@ const Map = () => {
         description={selectedContent.description}
         onClose={() => setSelectedContent({ url: null, title: '', description: '' })}
       />
-      <div className='sidebarStyle'>
+      <div className={`sidebarStyle ${isSidebarVisible ? '' : 'hidden'}`}>
         <p>Longitude: {lng}</p>
         <p>Latitude: {lat}</p>
         <p>Zoom: {zoom}</p>
-          {/* <div>Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}</div> */}
-        <button onClick={toggleMarker}>
+        <button className="form-button" onClick={toggleMarker}>
           {markerVisible ? "Hide Marker" : "Place Marker"}
         </button>
         <form className="search-box">
@@ -189,8 +194,8 @@ const Map = () => {
             onResult={(result) => {
               const { center } = result.result;
               setSelectedLocation({
-                  lng: center[0].toFixed(12),
-                  lat: center[1].toFixed(12)
+                lng: center[0].toFixed(12),
+                lat: center[1].toFixed(12)
               });
             }}
             value={value}
@@ -206,9 +211,9 @@ const Map = () => {
           <input className="in" type="text" placeholder="Title" value={title} onChange={e => setTitle(e.target.value)} />
           <input className="in" type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} />
           <input type="file" onChange={handleFileChange} />
-          <button type="submit">Upload</button>
+          <button className="form-button" type="submit">Upload</button>
         </form>
-        <button onClick={toggleMapStyle}>Toggle Map Style</button>
+        <button className="form-button" onClick={toggleMapStyle}>Toggle Map Style</button>
       </div>
       <div className='map-container' ref={mapContainerRef} />
     </div>
