@@ -65,22 +65,18 @@ def process_video(model, input_path, output_path):
             cv2.imwrite(tmpfile.name, frame)
 
             # Perform inference using the temporary file path
-            results = model(tmpfile.name, conf=0.05)
+            results = model.predict(tmpfile.name, conf=0.05)
 
             # Process the results as before, applying blurring to each detected region
-            for detections in results:
-                if isinstance(detections, torch.Tensor):
-                    for detection in detections:
-                        xmin, ymin, xmax, ymax, conf, class_id = detection
-                        xmin, ymin, xmax, ymax = map(int, [xmin, ymin, xmax, ymax])
+            for info in results:
+                parameters = info.boxes
+                for box in parameters:
+                    xmin, ymin, xmax, ymax = box.xyxy[0]
+                    xmin, ymin, xmax, ymax = map(int, [xmin, ymin, xmax, ymax])
 
-                        # roi = frame[ymin:ymax, xmin:xmax]
-                        # blurred_roi = cv2.GaussianBlur(roi, (23, 23), 30)
-                        # frame[ymin:ymax, xmin:xmax] = blurred_roi
-
-                        # apply_pixelation(frame, xmin, ymin, xmax, ymax)
-                        # randomize_pixels(frame, xmin, ymin, xmax, ymax)
-                        apply_blur_and_pixelation(frame, xmin, ymin, xmax, ymax)
+                    # apply_pixelation(frame, xmin, ymin, xmax, ymax)
+                    # randomize_pixels(frame, xmin, ymin, xmax, ymax)
+                    apply_blur_and_pixelation(frame, xmin, ymin, xmax, ymax)
 
             frame_count += 1
             out.write(frame)

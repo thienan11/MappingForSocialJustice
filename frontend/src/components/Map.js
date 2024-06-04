@@ -14,7 +14,9 @@ const Map = ({ isSidebarVisible }) => {
   const [lng, setLng] = useState(-120.6556);
   const [lat, setLat] = useState(35.2901);
   const [zoom, setZoom] = useState(12);
-  const [mapStyle, setMapStyle] = useState('mapbox://styles/mapbox/standard');
+  // const [mapStyle, setMapStyle] = useState('mapbox://styles/mapbox/standard');
+  // const [mapStyle, setMapStyle] = useState('mapbox://styles/areyeslo/clwzfctfb01c201ppag634owg'); // cal poly colors
+  const [mapStyle, setMapStyle] = useState('mapbox://styles/areyeslo/clwzf1xxz01gr01q1dzpzhiy5');
   const [selectedLocation, setSelectedLocation] = useState({ lng: -120.6556, lat: 35.2901 });
   const [file, setFile] = useState(null);
   const [title, setTitle] = useState('');
