@@ -22,4 +22,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# python virtual environment
+venv
+
+# environment variables
 .env
+
+__pycache__/

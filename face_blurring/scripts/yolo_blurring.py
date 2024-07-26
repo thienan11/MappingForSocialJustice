@@ -22,10 +22,10 @@ def process_image(model, input_path, output_path):
             # h, w = ymax - ymin, xmax - xmin
             # cvzone.cornerRect(img, (xmin, ymin, h, w), 20, rt=0)
 
-            apply_blur_and_pixelation(img, xmin, ymin, xmax, ymax)
-            # randomize_pixels(img, xmin, ymin, xmax, ymax)
+            # apply_gaussian_and_pixelation(img, xmin, ymin, xmax, ymax)
             # apply_superpixel_blurring(img, xmin, ymin, xmax, ymax)
-            # combined_blurring(img, xmin, ymin, xmax, ymax)
+            # shuffle_pixels_in_region(img, xmin, ymin, xmax, ymax)
+            # apply_random_sized_pixelation(img, xmin, ymin, xmax, ymax)
 
     # cv2.imshow("Image", img)
     # cv2.waitKey(0)
@@ -76,7 +76,10 @@ def process_video(model, input_path, output_path):
 
                     # apply_pixelation(frame, xmin, ymin, xmax, ymax)
                     # randomize_pixels(frame, xmin, ymin, xmax, ymax)
-                    apply_blur_and_pixelation(frame, xmin, ymin, xmax, ymax)
+                    # apply_gaussian_and_pixelation(frame, xmin, ymin, xmax, ymax)
+                    # shuffle_pixels_in_region(frame, xmin, ymin, xmax, ymax)
+                    # apply_random_sized_pixelation(frame, xmin, ymin, xmax, ymax)
+                    apply_superpixel_blurring(frame, xmin, ymin, xmax, ymax)
 
             frame_count += 1
             out.write(frame)
