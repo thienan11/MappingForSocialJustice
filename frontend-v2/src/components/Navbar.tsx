@@ -1,10 +1,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
 
   return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="sticky top-0 z-50 bg-white text-black border-b border-gray-200"
+    >
     <div className="sticky top-0 z-50 bg-white text-black border-b border-gray-200">
       <div className="max-w-screen-lg mx-auto flex justify-between items-center px-3 py-2">
         <div className="flex items-center">
@@ -18,7 +25,7 @@ const Navbar: React.FC = () => {
 
         <div className="flex items-center">
           <p
-            id="auth-buttons"
+            id="nav-buttons"
             className="cursor-pointer mr-5 hover:text-red-500"
             onClick={() => navigate("/map")}
           >
@@ -26,7 +33,7 @@ const Navbar: React.FC = () => {
           </p>
 
           <p
-            id="auth-buttons"
+            id="nav-buttons"
             className="cursor-pointer mr-5 hover:text-red-500"
             onClick={() => navigate("/form")}
           >
@@ -34,7 +41,7 @@ const Navbar: React.FC = () => {
           </p>
 
           <p
-            id="auth-buttons"
+            id="nav-buttons"
             className="cursor-pointer mr-5 hover:text-red-500"
             onClick={() => navigate("/about")}
           >
@@ -42,7 +49,7 @@ const Navbar: React.FC = () => {
           </p>
 
           <img
-            id="auth-buttons"
+            id="nav-buttons"
             src="./icons/github-icon.png"
             alt="github-icon"
             width="30px"
@@ -51,7 +58,8 @@ const Navbar: React.FC = () => {
           />
         </div>
       </div>
-    </div>
+      </div>
+    </motion.div>
   );
 };
 
