@@ -1,37 +1,55 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-// Define the type for props
-interface NavbarProps {
-  toggleSidebar: () => void;
-}
-
-const Navbar: React.FC<NavbarProps> = ({ toggleSidebar }) => {
+const Navbar: React.FC = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   return (
-    <div className="navbar">
-      <div className="navbar-col">
-        <div id="icon-header" onClick={() => navigate("/")}>
-          <h1>Mapping for Social Justice</h1>
+    <div className="sticky top-0 z-50 bg-white text-black border-b border-gray-200">
+      <div className="max-w-screen-lg mx-auto flex justify-between items-center px-3 py-2">
+        <div className="flex items-center">
+          <div id="icon-header" onClick={() => navigate("/")} className="cursor-pointer mr-5">
+            {/* <h1 className="text-2xl text-black m-0">
+              Mapping For Social Justice
+            </h1> */}
+            <img src="/images/logo.png" alt="logo" width="110px" />
+          </div>
         </div>
-      </div>
 
-      <div className="navbar-col">
-        {location.pathname === '/' && (
-          <button className="toggle-sidebar-btn" onClick={toggleSidebar}>Toggle Form</button>
-        )}
+        <div className="flex items-center">
+          <p
+            id="auth-buttons"
+            className="cursor-pointer mr-5 hover:text-red-500"
+            onClick={() => navigate("/map")}
+          >
+            View Map
+          </p>
 
-        <p id="auth-buttons" onClick={() => navigate("/about")}>About</p>
-      
-        <img
-          id="auth-buttons"
-          src="./icons/github-icon.png"
-          alt="github-icon"
-          width="30px"
-          onClick={() => window.open("https://github.com/thienan11/MappingforSocialJustice")}
-        />
+          <p
+            id="auth-buttons"
+            className="cursor-pointer mr-5 hover:text-red-500"
+            onClick={() => navigate("/form")}
+          >
+            Add Event
+          </p>
+
+          <p
+            id="auth-buttons"
+            className="cursor-pointer mr-5 hover:text-red-500"
+            onClick={() => navigate("/about")}
+          >
+            About
+          </p>
+
+          <img
+            id="auth-buttons"
+            src="./icons/github-icon.png"
+            alt="github-icon"
+            width="30px"
+            className="cursor-pointer mr-5 hover:opacity-80"
+            onClick={() => window.open("https://github.com/thienan11/MappingforSocialJustice")}
+          />
+        </div>
       </div>
     </div>
   );
