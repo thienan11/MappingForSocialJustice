@@ -1,13 +1,18 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import About from './pages/About';
-import Navbar from './components/Navbar';
-import Map from './components/Mapbox';
-import Home from './pages/Home';
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from "react-router-dom";
+import About from "./pages/About";
+import Navbar from "./components/Navbar";
+import Map from "./components/Map";
+import Home from "./pages/Home";
 
 function App() {
   return (
     <Router>
-      <Navbar/>
+      <Navbar />
       <Routes>
         <Route path="/about" element={<About />} />
         <Route path="/map" element={<Map />} />
@@ -18,4 +23,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
