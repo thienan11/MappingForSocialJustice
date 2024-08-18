@@ -2,8 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import MapboxGeocoder from "@mapbox/mapbox-gl-geocoder";
 import "@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css"; // Import CSS
-import { CoordinateZoomControl } from "./CoordinateZoomControl";
+import { CoordinateZoomControl } from "../utils/CoordinateZoomControl";
 import { motion } from 'framer-motion';
+import 'mapbox-gl/dist/mapbox-gl.css';
+import { MediaItem } from "../models/MediaItem";
 
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
 mapboxgl.accessToken = mapboxToken;
@@ -17,6 +19,7 @@ const MapComponent: React.FC = () => {
   const [lng, setLng] = useState<number>(51.35140956290013);
   const [lat, setLat] = useState<number>(35.70152639644212);
   const [zoom, setZoom] = useState<number>(12);
+  const [mapLoaded, setMapLoaded] = useState(false);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -27,6 +30,25 @@ const MapComponent: React.FC = () => {
       zoom: zoom,
     });
 
+    map.current.on('load', () => {
+      console.log("Map loaded event fired");
+      setMapLoaded(true);
+    });
+
+    // Cleanup function to remove the map when the component unmounts
+    return () => {
+      console.log("Cleanup function called");
+      if (map.current) {
+        map.current.remove();
+        map.current = null; // Ensure map is fully destroyed
+      }
+    };
+
+  });
+
+  useEffect(() => {
+    if (!mapLoaded) return;
+  
     // Define type for mapboxgl instance
     // type MapboxGL = typeof mapboxgl;
 
@@ -65,7 +87,43 @@ const MapComponent: React.FC = () => {
       map.current.addControl(control, "top-right");
       console.log("Custom control added");
     }
-  }, [lng, lat, zoom]);
+    
+    const fetchMediaItems = async () => {
+      try {
+        const response = await fetch('http://localhost:4000/media');
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        const mediaItems: MediaItem[] = await response.json();
+        mediaItems.forEach((item: MediaItem) => {
+          const { lat, lng, title, description, url } = item;
+
+          const lngLat: [number, number] = [parseFloat(lng.toString()), parseFloat(lat.toString())];
+
+          // Create a custom marker element
+          const markerElement = document.createElement('div');
+          markerElement.className = 'custom-marker';
+          markerElement.style.fontSize = '100px';
+          markerElement.style.color = 'red';
+          markerElement.innerHTML = '◦'; // Marker content
+          
+          // Create a popup with the content info
+          const popup = new mapboxgl.Popup({ offset: 25 })
+            .setHTML(`<h3>${title}</h3><p>${description}</p>`);
+
+          // Create and add the marker
+          new mapboxgl.Marker({ element: markerElement })
+            .setLngLat(lngLat)
+            .setPopup(popup)
+            .addTo(map.current!);
+        });
+      } catch (error) {
+        console.error('Error fetching media items:', error);
+      }
+    };
+
+    fetchMediaItems();
+  }, [mapLoaded]);
 
   return (
     // add min-h-screen ?
