@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { NavLink } from 'react-router-dom';
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
@@ -24,29 +25,32 @@ const Navbar: React.FC = () => {
         </div>
 
         <div className="flex items-center">
-          <p
-            id="nav-buttons"
-            className="cursor-pointer mr-5 hover:text-red-500"
-            onClick={() => navigate("/map")}
+          <NavLink
+            to="/map"
+            className={({ isActive }) =>
+              `cursor-pointer mr-5 hover:text-red-500 ${isActive ? 'text-red-500' : ''}`
+            }
           >
             View Map
-          </p>
+          </NavLink>
 
-          <p
-            id="nav-buttons"
-            className="cursor-pointer mr-5 hover:text-red-500"
-            onClick={() => navigate("/form")}
+          <NavLink
+            to="/form"
+            className={({ isActive }) =>
+              `cursor-pointer mr-5 hover:text-red-500 ${isActive ? 'text-red-500' : ''}`
+            }
           >
             Add Event
-          </p>
+          </NavLink>
 
-          <p
-            id="nav-buttons"
-            className="cursor-pointer mr-5 hover:text-red-500"
-            onClick={() => navigate("/about")}
+          <NavLink
+            to="/about"
+            className={({ isActive }) =>
+              `cursor-pointer mr-5 hover:text-red-500 ${isActive ? 'text-red-500' : ''}`
+            }
           >
             About
-          </p>
+          </NavLink>
 
           <img
             id="nav-buttons"

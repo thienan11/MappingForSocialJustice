@@ -19,7 +19,7 @@ const About: React.FC = () => {
         </p>
 
         <p className="text-lg text-gray-600 leading-relaxed max-w-3xl mb-6">
-          Visit our website at <a href="https://studiovoice.org" className="text-red-500">studiovoice.org</a>.
+          Visit our website at <a href="https://studiovoice.org" className="text-red-500 hover:underline" target='_blank'>studiovoice.org</a>.
         </p>
 
       </div>
