@@ -6,28 +6,45 @@ import { CoordinateZoomControl } from "../utils/CoordinateZoomControl";
 import { motion } from 'framer-motion';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MediaItem } from "../models/MediaItem";
+import Modal from "./Modal";
 
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
 mapboxgl.accessToken = mapboxToken;
 
-const MapComponent: React.FC = () => {
+const Map: React.FC = () => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   // const mapRef = useRef<mapboxgl.Map | null>(null);
-  const geocoderContainer = useRef<HTMLDivElement | null>(null);
-
   const map = useRef<mapboxgl.Map | null>(null);
-  const [lng, setLng] = useState<number>(51.35140956290013);
-  const [lat, setLat] = useState<number>(35.70152639644212);
-  const [zoom, setZoom] = useState<number>(12);
+  const geocoderContainer = useRef<HTMLDivElement | null>(null);
+  const geocoderRef = useRef<MapboxGeocoder | null>(null);
+
+  // const [lng, setLng] = useState<number>(51.35140956290013);
+  // const [lat, setLat] = useState<number>(35.70152639644212);
+  // const [zoom, setZoom] = useState<number>(12);
+
+  const initialLng = useRef(51.35140956290013);
+  const initialLat = useRef(35.70152639644212);
+  const initialZoom = useRef(12);
+  
   const [mapLoaded, setMapLoaded] = useState(false);
+
+  // State for modal
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState<{ title: string; description: string; contentUrl: string; }>({
+    title: "",
+    description: "",
+    contentUrl: "",
+  });
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
       container: mapContainer.current!,
       style: "mapbox://styles/areyeslo/clwzf7thv01c101ppegim3y6g",
-      center: [lng, lat],
-      zoom: zoom,
+      // center: [lng, lat],
+      // zoom: zoom,
+      center: [initialLng.current, initialLat.current],
+      zoom: initialZoom.current,
     });
 
     map.current.on('load', () => {
@@ -44,7 +61,7 @@ const MapComponent: React.FC = () => {
       }
     };
 
-  });
+  }, []); // Empty dependency array ensures this runs only once
 
   useEffect(() => {
     if (!mapLoaded) return;
@@ -52,34 +69,38 @@ const MapComponent: React.FC = () => {
     // Define type for mapboxgl instance
     // type MapboxGL = typeof mapboxgl;
 
-    // Initialize the geocoder
-    const geocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken,
-      // mapboxgl: mapboxgl as MapboxGL,
-      marker: false, // Do not add a marker automatically
-      placeholder: "Search for places", // Placeholder text for the search input
-    });
+    // Initialize the geocoder only if it hasn't been initialized yet
+    if (!geocoderRef.current) {
+      geocoderRef.current = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        // mapboxgl: mapboxgl as MapboxGL,
+        marker: false, // Do not add a marker automatically
+        placeholder: "Search for places", // Placeholder text for the search input
+      });
 
-    // Add geocoder to the map
-    geocoder.addTo(geocoderContainer.current!);
+      // Add geocoder to the map
+      if (geocoderContainer.current) {
+        geocoderRef.current.addTo(geocoderContainer.current!);
 
-    // Update map center when a result is selected
-    geocoder.on("result", (e) => {
-      console.log("Full result:", e.result); // Check the structure of e.result
-      const { geometry } = e.result;
+        // Update map center when a result is selected
+        geocoderRef.current.on("result", (e) => {
+          console.log("Full result:", e.result); // Check the structure of e.result
+          const { geometry } = e.result;
 
-      if (geometry && geometry.coordinates) {
-        const [lng, lat] = geometry.coordinates;
-        console.log("Coordinates:", { lng, lat });
+          if (geometry && geometry.coordinates) {
+            const [lng, lat] = geometry.coordinates;
+            console.log("Coordinates:", { lng, lat });
 
-        map.current?.flyTo({
-          center: [lng, lat],
-          zoom: 14,
+            map.current?.jumpTo({
+              center: [lng, lat],
+              zoom: 14,
+            });
+          } else {
+            console.error("No coordinates found in the result.");
+          }
         });
-      } else {
-        console.error("No coordinates found in the result.");
       }
-    });
+    }
 
     // Add the custom control to the map
     if (map.current) {
@@ -87,7 +108,17 @@ const MapComponent: React.FC = () => {
       map.current.addControl(control, "top-right");
       console.log("Custom control added");
     }
-    
+
+    // Cleanup geocoder on component unmount
+    return () => {
+      if (geocoderRef.current) {
+        geocoderRef.current.onRemove();
+        geocoderRef.current = null;
+      }
+    };
+  }, [mapLoaded]); // Dependency array ensures this runs when mapLoaded changes
+
+  useEffect(() => {
     const fetchMediaItems = async () => {
       try {
         const response = await fetch('http://localhost:4000/media');
@@ -103,26 +134,38 @@ const MapComponent: React.FC = () => {
           // Create a custom marker element
           const markerElement = document.createElement('div');
           markerElement.className = 'custom-marker';
-          markerElement.style.fontSize = '100px';
+          markerElement.style.fontSize = '50px';
           markerElement.style.color = 'red';
           markerElement.innerHTML = '◦'; // Marker content
           
           // Create a popup with the content info
-          const popup = new mapboxgl.Popup({ offset: 25 })
-            .setHTML(`<h3>${title}</h3><p>${description}</p>`);
+          // const popup = new mapboxgl.Popup({ offset: 25 })
+          // .setHTML(`<h3>${title}</h3><p>${description}</p><p><a href="${url}" target="_blank">View media</a></p>`);
+
+          // const popup = new mapboxgl.Popup({ offset: 25 })
+          // .setHTML(`<h3>${title}</h3><p>${description}</p><p><a href="#">View media</a></p>`);
 
           // Create and add the marker
-          new mapboxgl.Marker({ element: markerElement })
+          const marker = new mapboxgl.Marker({ element: markerElement })
             .setLngLat(lngLat)
-            .setPopup(popup)
+            // .setPopup(popup)
             .addTo(map.current!);
+          
+          // Handle click event on the marker
+          marker.getElement().addEventListener('click', () => {
+            setModalContent({ title, description, contentUrl: url });
+            setIsModalOpen(true);
+          });
         });
       } catch (error) {
         console.error('Error fetching media items:', error);
       }
     };
 
-    fetchMediaItems();
+    if (mapLoaded) {
+      fetchMediaItems();
+    }
+
   }, [mapLoaded]);
 
   return (
@@ -148,8 +191,16 @@ const MapComponent: React.FC = () => {
           />
         </div>
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={modalContent.title}
+        description={modalContent.description}
+        contentUrl={modalContent.contentUrl}
+      />
     </motion.div>
   );
 };
 
-export default MapComponent;
+export default Map;

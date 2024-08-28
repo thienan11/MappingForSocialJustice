@@ -6,9 +6,9 @@ import {
 } from "react-router-dom";
 import About from "./pages/About";
 import Navbar from "./components/Navbar";
-import Map from "./components/Map";
+import MapView from "./pages/MapView";
 import Home from "./pages/Home";
-import AddEvent from "./pages/AddEvent";
+import "./App.css";
 
 function App() {
   return (
@@ -16,8 +16,7 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/about" element={<About />} />
-        <Route path="/map" element={<Map />} />
-        <Route path="/form" element={<AddEvent />} />
+        <Route path="/map" element={<MapView />} />
         <Route path="/" element={<Home />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

@@ -34,14 +34,14 @@ const Navbar: React.FC = () => {
             View Map
           </NavLink>
 
-          <NavLink
+          {/* <NavLink
             to="/form"
             className={({ isActive }) =>
               `cursor-pointer mr-5 hover:text-red-500 ${isActive ? 'text-red-500' : ''}`
             }
           >
             Add Event
-          </NavLink>
+          </NavLink> */}
 
           <NavLink
             to="/about"
