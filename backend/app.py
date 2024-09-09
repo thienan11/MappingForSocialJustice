@@ -14,7 +14,12 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)
+# CORS(app)
+
+if os.getenv("FLASK_ENV") == "development":
+    CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}) # Development
+else:
+    CORS(app, resources={r"/*": {"origins": os.getenv("FRONTEND_PROD_URL")}}) # Production
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -77,7 +82,9 @@ def upload_file():
                 'ContentDisposition': 'inline'
             }
         )
-        s3_url = f"https://{os.getenv('AWS_BUCKET_NAME')}.{os.getenv('AWS_ENDPOINT')}/{filename}"
+
+        endpoint = os.getenv('AWS_ENDPOINT').replace('https://', '')
+        s3_url = f"https://{os.getenv('AWS_BUCKET_NAME')}.{endpoint}/{filename}"
 
         # Save to MongoDB
         media = {

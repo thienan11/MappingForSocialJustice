@@ -6,12 +6,14 @@ import { CoordinateZoomControl } from "../utils/CoordinateZoomControl";
 import { motion } from 'framer-motion';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MediaItem } from "../models/MediaItem";
-import Modal from "./Modal";
+import { MapProps } from "../models/MapProps";
+
+const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:4000' : import.meta.env.VITE_API_PROD_URL;
 
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
 mapboxgl.accessToken = mapboxToken;
 
-const Map: React.FC = () => {
+const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPreviewMarker }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   // const mapRef = useRef<mapboxgl.Map | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -28,13 +30,15 @@ const Map: React.FC = () => {
   
   const [mapLoaded, setMapLoaded] = useState(false);
 
-  // State for modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState<{ title: string; description: string; contentUrl: string; }>({
-    title: "",
-    description: "",
-    contentUrl: "",
-  });
+  const previewMarker = useRef<mapboxgl.Marker | null>(null);
+
+  // // State for modal
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [modalContent, setModalContent] = useState<{ title: string; description: string; contentUrl: string; }>({
+  //   title: "",
+  //   description: "",
+  //   contentUrl: "",
+  // });
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -52,6 +56,23 @@ const Map: React.FC = () => {
       setMapLoaded(true);
     });
 
+    map.current.on('dblclick', (e) => {
+      e.preventDefault(); // prevent default mapbox double click zoom
+      const { lng, lat } = e.lngLat;
+
+      // Remove previous preview marker if any
+      if (previewMarker.current) {
+        previewMarker.current.remove();
+      }
+      // Add new preview marker
+      previewMarker.current = new mapboxgl.Marker({ color: 'red' })
+        .setLngLat(e.lngLat)
+        .addTo(map.current!);
+
+      onMapDoubleClick({ lat, lng });
+      // onDoubleClick({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+    });
+
     // Cleanup function to remove the map when the component unmounts
     return () => {
       console.log("Cleanup function called");
@@ -62,6 +83,20 @@ const Map: React.FC = () => {
     };
 
   }, []); // Empty dependency array ensures this runs only once
+
+  // Use to clear the preview marker when the map is loaded (when canceling form)
+  useEffect(() => {
+    if (mapLoaded) {
+      setClearPreviewMarker(() => {
+        return () => {
+          if (previewMarker.current) {
+            previewMarker.current.remove();
+            previewMarker.current = null;
+          }
+        };
+      });
+    }
+  }, [mapLoaded, setClearPreviewMarker]);
 
   useEffect(() => {
     if (!mapLoaded) return;
@@ -118,10 +153,12 @@ const Map: React.FC = () => {
     };
   }, [mapLoaded]); // Dependency array ensures this runs when mapLoaded changes
 
+  // this is called when a media item is clicked, is this efficient?
   useEffect(() => {
     const fetchMediaItems = async () => {
+      console.log("Fetching media items...");
       try {
-        const response = await fetch('http://localhost:4000/media');
+        const response = await fetch(`${API_URL}/media`);
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
@@ -151,10 +188,13 @@ const Map: React.FC = () => {
             // .setPopup(popup)
             .addTo(map.current!);
           
-          // Handle click event on the marker
+          // // Handle click event on the marker
+          // marker.getElement().addEventListener('click', () => {
+          //   setModalContent({ title, description, contentUrl: url });
+          //   setIsModalOpen(true);
+          // });
           marker.getElement().addEventListener('click', () => {
-            setModalContent({ title, description, contentUrl: url });
-            setIsModalOpen(true);
+            onMarkerClick({ title, description, contentUrl: url });
           });
         });
       } catch (error) {
@@ -166,7 +206,7 @@ const Map: React.FC = () => {
       fetchMediaItems();
     }
 
-  }, [mapLoaded]);
+  }, [mapLoaded, onMarkerClick]);
 
   return (
     // add min-h-screen ?
@@ -192,13 +232,13 @@ const Map: React.FC = () => {
         </div>
       </div>
 
-      <Modal
+      {/* <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title={modalContent.title}
         description={modalContent.description}
         contentUrl={modalContent.contentUrl}
-      />
+      /> */}
     </motion.div>
   );
 };

@@ -5,4 +5,5 @@ export interface MediaItem {
   description: string;
   url: string;
   mediaType: string;
+  _id: string;
 }
