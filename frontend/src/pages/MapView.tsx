@@ -1,0 +1,78 @@
+import React, { useState } from 'react';
+import Map from '../components/Map';
+import AddEventForm from '../components/AddEventForm';
+import MediaViewer from '../components/MediaViewer'; // MediaViewer to be created
+
+const MapView: React.FC = () => {
+  const [showAddEventForm, setShowAddEventForm] = useState(false);
+  const [showMediaViewer, setShowMediaViewer] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [mediaContent, setMediaContent] = useState<{ title: string; description: string; contentUrl: string } | null>(null);
+  const [clearPreviewMarker, setClearPreviewMarker] = useState<() => void>(() => {});
+
+  const handleDoubleClick = (location: { lat: number; lng: number }) => {
+    setSelectedLocation(location);
+    setShowAddEventForm(true);
+    setShowMediaViewer(false); // Close media viewer when opening AddEventForm
+  };
+
+  const handleMarkerClick = (content: { title: string; description: string; contentUrl: string }) => {
+    setMediaContent(content);
+    setShowMediaViewer(true);
+    setShowAddEventForm(false); // Close AddEventForm when opening media viewer (reduntant)
+    handleCancel(); // Clear selected location and preview marker when opening media viewer
+  };
+
+  const handleCancel = () => {
+    setShowAddEventForm(false);
+    setSelectedLocation(null);
+    if (clearPreviewMarker) clearPreviewMarker();
+  };
+
+  return (
+    // removed h-screen so no access space at the bottom
+    <div className="grid grid-cols-1 grid-rows-1">
+      <div
+        className={`grid ${
+          showAddEventForm || showMediaViewer
+            ? 'grid-cols-2 gap-4' // removed gap-4 so less gap between the two components
+            : 'grid-cols-1'
+        } h-full w-full p-4`}
+      >
+        <div className={`col-span-1 row-span-1 ${
+            showAddEventForm || showMediaViewer ? 'border border-gray-200' : ''
+          }`}
+        >
+          <Map
+            onMapDoubleClick={handleDoubleClick}
+            onMarkerClick={handleMarkerClick}
+            setClearPreviewMarker={setClearPreviewMarker}
+          />
+        </div>
+
+        {showAddEventForm && selectedLocation && (
+          <div className="col-span-1 row-span-1 border border-gray-200">
+            <AddEventForm
+              location={selectedLocation}
+              onClose={handleCancel}
+            />
+          </div>
+        )}
+
+        {showMediaViewer && mediaContent && (
+          <div className="col-span-1 row-span-1 border border-gray-200">
+            <MediaViewer
+              key={mediaContent.contentUrl} // key prop to re-render MediaViewer when contentUrl changes
+              title={mediaContent.title}
+              description={mediaContent.description}
+              contentUrl={mediaContent.contentUrl}
+              onClose={() => setShowMediaViewer(false)}
+            />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default MapView;
