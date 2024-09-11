@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
 import Map from '../components/Map';
 import AddEventForm from '../components/AddEventForm';
-import MediaViewer from '../components/MediaViewer'; // MediaViewer to be created
+import MediaViewer from '../components/MediaViewer';
+import Modal from '../components/Modal';
+import { FaQuestionCircle } from "react-icons/fa";
 
 const MapView: React.FC = () => {
   const [showAddEventForm, setShowAddEventForm] = useState(false);
   const [showMediaViewer, setShowMediaViewer] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [mediaContent, setMediaContent] = useState<{ title: string; description: string; contentUrl: string } | null>(null);
-  const [clearPreviewMarker, setClearPreviewMarker] = useState<() => void>(() => {});
+  const [clearPreviewMarker, setClearPreviewMarker] = useState<() => void>(() => { });
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   const handleDoubleClick = (location: { lat: number; lng: number }) => {
     setSelectedLocation(location);
@@ -32,10 +35,37 @@ const MapView: React.FC = () => {
   return (
     // removed h-screen so no access space at the bottom
     <div className="grid grid-cols-1 grid-rows-1">
+      {/* Help Button */}
+      <div
+        className="fixed bottom-4 right-4 text-black-500 p-3 rounded-full hover:text-gray-600 cursor-pointer z-50"
+        onClick={() => setShowHelpModal(true)}
+        aria-label="Help"
+        role="button" // To make it accessible as a clickable element?
+      >
+        <FaQuestionCircle size={24} />
+      </div>
+
+      {/* Help Modal */}
+      {showHelpModal && (
+        <Modal
+          title="How to Use"
+          content={
+            <div>
+              <p>Here's how you can interact with the map:</p>
+              <ul className="list-disc ml-5 my-2">
+                <li>Double-click on the map to add a new event at the selected location.</li>
+                <li>Click on a marker to view media associated with that location.</li>
+              </ul>
+            </div>
+          }
+          onClose={() => setShowHelpModal(false)}
+        />
+      )}
+
       <div
         className={`grid ${
           showAddEventForm || showMediaViewer
-            ? 'grid-cols-2 gap-4' // removed gap-4 so less gap between the two components
+            ? 'grid-cols-2 gap-4' // gap-4 so for gap between the two components
             : 'grid-cols-1'
         } h-full w-full p-4`}
       >

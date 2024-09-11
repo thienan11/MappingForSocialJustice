@@ -17,6 +17,7 @@ const AddEventForm: React.FC<AddEventFormProps> = ({ location, onClose }) => {
     formData.append('lat', location.lat.toString());
     formData.append('lng', location.lng.toString());
 
+    // TODO: add uploading progress indicator
     try {
       const response = await fetch('http://localhost:4000/upload', {
         method: 'POST',

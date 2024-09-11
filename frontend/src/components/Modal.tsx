@@ -1,69 +1,36 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
+import { ModalProps } from '../models/ModalProps';
 
-type ModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  description: string;
-  contentUrl: string;
-};
-
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, description, contentUrl }) => {
-  const modalRef = useRef<HTMLDivElement | null>(null);
-
-  // Close modal if click is outside of the modal content
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
+const Modal: React.FC<ModalProps> = ({ title, content, onClose }) => {
+  const handleBackgroundClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Close the modal only if the background (overlay) is clicked
+    if (e.target === e.currentTarget) {
+      onClose();
     }
-
-    // Cleanup event listener on unmount
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
-  // Determine if the content is a video or an image
-  const isVideo = /\.(mp4|mov)$/.test(contentUrl);
-
-  // Determine MIME type for video
-  const mimeType = contentUrl.endsWith('.mp4') ? 'video/mp4' : 'video/quicktime';
+  };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-      <div ref={modalRef} className="bg-white rounded-lg p-6 max-w-full max-h-full w-11/12 md:w-3/4 lg:w-2/3 xl:w-1/2 overflow-auto">
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      onClick={handleBackgroundClick} // Handles clicking outside the modal
+    >
+      <div className="bg-white p-6 rounded shadow-lg max-w-lg w-full">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-bold">{title}</h2>
-          <button onClick={onClose} className="text-black">
-            <img
-              src="/icons/close.svg"
-              alt="close"
-              width="30px"
-              className="hover:transform hover:scale-110"
-            />
+          <button
+            onClick={onClose}
+            className="text-gray-600 hover:text-gray-800 transform hover:scale-110 cursor-pointer"
+          >
+            &#10005; {/* This is a simple "X" close button */}
           </button>
         </div>
-        <p className="mb-4">{description}</p>
-        <div className="bg-white media-content flex justify-center items-center">
-          {isVideo ? (
-            <video controls className="max-w-full max-h-96">
-              <source src={contentUrl} type={mimeType} />
-              Your browser does not support the video tag.
-            </video>
-          ) : (
-            <img src={contentUrl} alt={title} className="max-w-full max-h-96 object-contain" />
-          )}
-        </div>
+        <div>{content}</div>
+        {/* <button
+          className="mt-4 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
+          onClick={onClose}
+        >
+          Close
+        </button> */}
       </div>
     </div>
   );
