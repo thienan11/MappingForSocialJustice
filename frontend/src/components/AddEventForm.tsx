@@ -1,10 +1,13 @@
 import React, { useState } from "react";
 import { AddEventFormProps } from "../models/AddEventProps";
+import Loading from "./Loading";
 
 const AddEventForm: React.FC<AddEventFormProps> = ({ location, onClose }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [file, setFile] = useState<File | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadAbortController, setUploadAbortController] = useState<AbortController | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -18,17 +21,38 @@ const AddEventForm: React.FC<AddEventFormProps> = ({ location, onClose }) => {
     formData.append('lng', location.lng.toString());
 
     // TODO: add uploading progress indicator
+    const controller = new AbortController(); // Create a new AbortController
+    setUploadAbortController(controller);
+    setIsUploading(true); // Start uploading
+
     try {
       const response = await fetch('http://localhost:4000/upload', {
         method: 'POST',
         body: formData,
+        signal: controller.signal // Pass the abort signal to the fetch request
       });
       if (!response.ok) throw new Error('Upload failed');
       alert('Upload successful');
       onClose(); // Close the form after submission
     } catch (error) {
-      console.error('Error uploading file:', error);
+      if ((error as Error).name === 'AbortError') {
+        console.log('Upload cancelled');
+      } else {
+        console.error('Error uploading file:', error);
+      }
+    } finally {
+      setIsUploading(false); // End uploading
     }
+  };
+
+  // TODO: need to handle on the backend
+  const handleCancel = () => {
+    if (uploadAbortController) {
+      uploadAbortController.abort(); // Cancel the ongoing upload
+      setIsUploading(false); // Stop showing the progress bar
+      setFile(null); // Optionally, reset the file input
+    }
+    onClose(); // Close the form
   };
 
   return (
@@ -72,13 +96,25 @@ const AddEventForm: React.FC<AddEventFormProps> = ({ location, onClose }) => {
         <strong className="mb-4 text-lg text-gray-700">Coordinates:</strong> 
         <div>Lat: {location.lat.toFixed(4)}, Lng: {location.lng.toFixed(4)}</div>
       </div>
+      {isUploading && (
+        <div className="mb-4">
+          <Loading />
+        </div>
+      )}
       <div className="flex justify-center space-x-4">
-        <button type="submit" className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">
-          Upload
-        </button>
-        <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
-          Cancel
-        </button>
+        {!isUploading && (
+          <button 
+            type="submit" 
+            className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+          >
+            Upload
+          </button>
+        )}
+        {!isUploading && (
+          <button type="button" onClick={handleCancel} className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
+            Cancel
+          </button>
+        )}
       </div>
     </form>
   );

@@ -8,6 +8,8 @@ import mimetypes
 from dotenv import load_dotenv
 import logging
 from bson.json_util import dumps, ObjectId
+import subprocess
+import tempfile
 
 # Load environment variables
 load_dotenv()
@@ -52,15 +54,49 @@ def serialize_doc(doc):
     doc['_id'] = str(doc['_id'])
     return doc
 
+# Helper function to process and blur media
+def blur_media(input_path, output_path, media_type):
+    logging.info(f"Processing {media_type} file.")
+    logging.info(f"Input path: {input_path}")
+    logging.info(f"Output path: {output_path}")
+
+    supported_formats = {'pfm', 'bmp', 'dng', 'png', 'webp', 'jpeg', 'tif', 'mpo', 'tiff', 'jpg', 'asf', 'mkv', 'avi', 'mpeg', 'm4v', 'webm', 'wmv', 'mp4', 'mpg', 'gif', 'ts', 'mov'}
+    file_ext = os.path.splitext(input_path)[1].lower().replace('.', '')
+    if file_ext not in supported_formats:
+        logging.error(f"Unsupported file format: {file_ext}")
+        raise ValueError(f"Unsupported file format: {file_ext}")
+
+    if not os.path.isfile(input_path):
+        logging.error(f"Input file does not exist or is not accessible: {input_path}")
+        raise FileNotFoundError(f"Input file does not exist or is not accessible: {input_path}")
+
+    script_path = 'face_blurring/scripts/yolo_blurring.py'
+    if not os.path.exists(script_path):
+        logging.error(f"Script file does not exist: {script_path}")
+        raise FileNotFoundError(f"Script file does not exist: {script_path}")
+
+    command = [
+        'python3', script_path,
+        '-m', media_type,
+        '-i', input_path,
+        '-o', output_path
+    ]
+    try:
+        result = subprocess.run(command, check=True, capture_output=True, text=True)
+        logging.info(f"Blurring completed successfully: {result.stdout}")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Blurring failed: {e.stderr}")
+        raise
+
 # Routes
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'media' not in request.files:
-        return "No file part", 400
+        return jsonify({"error": "No file part"}), 400
 
     file = request.files['media']
     if file.filename == '':
-        return "No selected file", 400
+        return jsonify({"error": "No selected file"}), 400
 
     title = request.form.get('title')
     description = request.form.get('description')
@@ -70,18 +106,36 @@ def upload_file():
     filename = secure_filename(file.filename)
     content_type = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
 
+    temp_input_file = None
+    temp_output_file = None
+
     try:
+        # Save the file temporarily
+        temp_input_file = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(filename)[1])
+        file.save(temp_input_file.name)
+
+        # Determine if the file is an image or video
+        media_type = 'image' if content_type.startswith('image') else 'video'
+
+        # Prepare output path for blurred file
+        temp_output_file = tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(filename)[1])
+        output_path = temp_output_file.name
+
+        # Apply blurring
+        blur_media(temp_input_file.name, output_path, media_type)
+
         # Upload to S3
-        s3.upload_fileobj(
-            file,
-            os.getenv("AWS_BUCKET_NAME"),
-            filename,
-            ExtraArgs={
-                'ACL': 'public-read',
-                'ContentType': content_type,
-                'ContentDisposition': 'inline'
-            }
-        )
+        with open(output_path, 'rb') as file_obj:
+            s3.upload_fileobj(
+                file_obj,
+                os.getenv("AWS_BUCKET_NAME"),
+                filename,
+                ExtraArgs={
+                    'ACL': 'public-read',
+                    'ContentType': content_type,
+                    'ContentDisposition': 'inline'
+                }
+            )
 
         endpoint = os.getenv('AWS_ENDPOINT').replace('https://', '')
         s3_url = f"https://{os.getenv('AWS_BUCKET_NAME')}.{endpoint}/{filename}"
@@ -102,6 +156,16 @@ def upload_file():
     except Exception as e:
         logging.error(f"Error uploading file: {e}")
         return str(e), 500
+    
+
+    finally:
+        # Cleanup temporary files
+        logging.info("Cleaning up temporary files...")
+        if temp_input_file and os.path.exists(temp_input_file.name):
+            os.remove(temp_input_file.name)
+        if temp_output_file and os.path.exists(output_path):
+            os.remove(output_path)
+        logging.info("Cleanup complete.")
 
 @app.route('/media', methods=['GET'])
 def get_media():
@@ -112,6 +176,8 @@ def get_media():
     except Exception as e:
         logging.error(f"Error retrieving media: {e}")
         return str(e), 500
+    
+# TODO: Implement the delete_media route (MongoDB and S3)
 
 @app.route('/')
 def home():
