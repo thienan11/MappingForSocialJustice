@@ -13,3 +13,5 @@ opencv-python-headless==4.9.0.80
 dill==0.3.8
 cvzone==1.6.1
 gunicorn
+dlib
+h5py

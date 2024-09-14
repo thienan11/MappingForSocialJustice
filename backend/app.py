@@ -11,6 +11,8 @@ from bson.json_util import dumps, ObjectId
 import subprocess
 import tempfile
 
+# TODO: Use uuid to generate unique filenames for uploaded media
+
 # Load environment variables
 load_dotenv()
 
@@ -21,7 +23,18 @@ app = Flask(__name__)
 if os.getenv("FLASK_ENV") == "development":
     CORS(app, resources={r"/*": {"origins": "http://localhost:5173"}}) # Development
 else:
-    CORS(app, resources={r"/*": {"origins": os.getenv("FRONTEND_PROD_URL")}}) # Production
+    CORS(app, resources={r"/*": {
+        "origins": os.getenv("FRONTEND_PROD_URL"),
+        "methods": ["GET", "POST", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }}) # Production
+
+@app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    return response
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -181,7 +194,7 @@ def get_media():
 
 @app.route('/')
 def home():
-    return "Welcome to the server!", 200
+    return "Welcome to the MFSJ server!", 200
 
 if __name__ == '__main__':
-    app.run(port=int(os.getenv("PORT", 4000)), debug=True)
+    app.run(host="0.0.0.0", port=int(os.getenv("PORT", 4000)), debug=True)
