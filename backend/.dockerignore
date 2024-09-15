@@ -7,3 +7,4 @@ package.json
 __pycache__
 .env
 .gitignore
+face_blurring/scripts/__pycache__
