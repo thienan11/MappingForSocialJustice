@@ -12,24 +12,41 @@ const MapView: React.FC = () => {
   const [mediaContent, setMediaContent] = useState<{ title: string; description: string; contentUrl: string } | null>(null);
   const [clearPreviewMarker, setClearPreviewMarker] = useState<() => void>(() => { });
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>(null);
 
   const handleDoubleClick = (location: { lat: number; lng: number }) => {
     setSelectedLocation(location);
     setShowAddEventForm(true);
     setShowMediaViewer(false); // Close media viewer when opening AddEventForm
+    setSelectedMarkerId(null);
   };
 
-  const handleMarkerClick = (content: { title: string; description: string; contentUrl: string }) => {
-    setMediaContent(content);
-    setShowMediaViewer(true);
-    setShowAddEventForm(false); // Close AddEventForm when opening media viewer (reduntant)
-    handleCancel(); // Clear selected location and preview marker when opening media viewer
-  };
-
-  const handleCancel = () => {
+  const handleMarkerClick = (id: string, content: { title: string; description: string; contentUrl: string }) => {
+    if (id === selectedMarkerId) {
+      setSelectedMarkerId(null);
+      setShowMediaViewer(false);
+    } else {
+      setMediaContent(content);
+      setShowMediaViewer(true);
+      setShowAddEventForm(false); // Close AddEventForm when opening media viewer (reduntant)
+      setSelectedMarkerId(id);
+    }
+    // Clear selected location and preview marker when opening media viewer
     setShowAddEventForm(false);
     setSelectedLocation(null);
     if (clearPreviewMarker) clearPreviewMarker();
+  };
+
+  const handleCloseMediaViewer = () => {
+    setShowMediaViewer(false);
+    setSelectedMarkerId(null);
+  };
+
+  const handleCloseAddEventForm = () => {
+    setShowAddEventForm(false);
+    setSelectedLocation(null);
+    if (clearPreviewMarker) clearPreviewMarker();
+    setSelectedMarkerId(null);
   };
 
   return (
@@ -77,6 +94,7 @@ const MapView: React.FC = () => {
             onMapDoubleClick={handleDoubleClick}
             onMarkerClick={handleMarkerClick}
             setClearPreviewMarker={setClearPreviewMarker}
+            selectedMarkerId={selectedMarkerId}
           />
         </div>
 
@@ -84,7 +102,7 @@ const MapView: React.FC = () => {
           <div className="col-span-1 row-span-1 border border-gray-200">
             <AddEventForm
               location={selectedLocation}
-              onClose={handleCancel}
+              onClose={handleCloseAddEventForm}
             />
           </div>
         )}
@@ -96,7 +114,7 @@ const MapView: React.FC = () => {
               title={mediaContent.title}
               description={mediaContent.description}
               contentUrl={mediaContent.contentUrl}
-              onClose={() => setShowMediaViewer(false)}
+              onClose={handleCloseMediaViewer}
             />
           </div>
         )}

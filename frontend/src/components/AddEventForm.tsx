@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { AddEventFormProps } from "../models/AddEventProps";
 import Loading from "./Loading";
 
+const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:4000' : import.meta.env.VITE_API_PROD_URL;
+
 const AddEventForm: React.FC<AddEventFormProps> = ({ location, onClose }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -26,7 +28,7 @@ const AddEventForm: React.FC<AddEventFormProps> = ({ location, onClose }) => {
     setIsUploading(true); // Start uploading
 
     try {
-      const response = await fetch('http://localhost:4000/upload', {
+      const response = await fetch(`${API_URL}/upload`, {
         method: 'POST',
         body: formData,
         signal: controller.signal // Pass the abort signal to the fetch request
@@ -82,7 +84,8 @@ const AddEventForm: React.FC<AddEventFormProps> = ({ location, onClose }) => {
         </label>
       </div>
       <div className="mb-4">
-        <label className="block mb-4 text-lg text-gray-700" htmlFor="file">
+        {!isUploading && (
+          <label className="block mb-4 text-lg text-gray-700" htmlFor="file">
           File:
           <input 
             id="file"
@@ -90,7 +93,8 @@ const AddEventForm: React.FC<AddEventFormProps> = ({ location, onClose }) => {
             onChange={(e) => setFile(e.target.files?.[0] || null)} 
             className="form-input mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" 
           />
-        </label>
+          </label>
+        )}
       </div>
       <div className="mb-4">
         <strong className="mb-4 text-lg text-gray-700">Coordinates:</strong> 

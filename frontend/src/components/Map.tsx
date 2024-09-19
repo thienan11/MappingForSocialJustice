@@ -13,7 +13,7 @@ const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:400
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
 mapboxgl.accessToken = mapboxToken;
 
-const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPreviewMarker }) => {
+const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPreviewMarker, selectedMarkerId }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   // const mapRef = useRef<mapboxgl.Map | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -32,6 +32,9 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
 
   const previewMarker = useRef<mapboxgl.Marker | null>(null);
 
+  const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
+
+  const markers = useRef<{ [id: string]: mapboxgl.Marker }>({});
   // // State for modal
   // const [isModalOpen, setIsModalOpen] = useState(false);
   // const [modalContent, setModalContent] = useState<{ title: string; description: string; contentUrl: string; }>({
@@ -153,7 +156,7 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
     };
   }, [mapLoaded]); // Dependency array ensures this runs when mapLoaded changes
 
-  // this is called when a media item is clicked, is this efficient?
+  // Fetch media items
   useEffect(() => {
     const fetchMediaItems = async () => {
       console.log("Fetching media items...");
@@ -162,41 +165,8 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
-        const mediaItems: MediaItem[] = await response.json();
-        mediaItems.forEach((item: MediaItem) => {
-          const { lat, lng, title, description, url } = item;
-
-          const lngLat: [number, number] = [parseFloat(lng.toString()), parseFloat(lat.toString())];
-
-          // Create a custom marker element
-          const markerElement = document.createElement('div');
-          markerElement.className = 'custom-marker';
-          markerElement.style.fontSize = '50px';
-          markerElement.style.color = 'red';
-          markerElement.innerHTML = '◦'; // Marker content
-          
-          // Create a popup with the content info
-          // const popup = new mapboxgl.Popup({ offset: 25 })
-          // .setHTML(`<h3>${title}</h3><p>${description}</p><p><a href="${url}" target="_blank">View media</a></p>`);
-
-          // const popup = new mapboxgl.Popup({ offset: 25 })
-          // .setHTML(`<h3>${title}</h3><p>${description}</p><p><a href="#">View media</a></p>`);
-
-          // Create and add the marker
-          const marker = new mapboxgl.Marker({ element: markerElement })
-            .setLngLat(lngLat)
-            // .setPopup(popup)
-            .addTo(map.current!);
-          
-          // // Handle click event on the marker
-          // marker.getElement().addEventListener('click', () => {
-          //   setModalContent({ title, description, contentUrl: url });
-          //   setIsModalOpen(true);
-          // });
-          marker.getElement().addEventListener('click', () => {
-            onMarkerClick({ title, description, contentUrl: url });
-          });
-        });
+        const items: MediaItem[] = await response.json();
+        setMediaItems(items);
       } catch (error) {
         console.error('Error fetching media items:', error);
       }
@@ -205,8 +175,63 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
     if (mapLoaded) {
       fetchMediaItems();
     }
+  }, [mapLoaded]);
 
-  }, [mapLoaded, onMarkerClick]);
+  // Create markers and attach click listeners
+  useEffect(() => {
+    if (!mapLoaded || !map.current) return;
+
+    // Clear existing markers
+    Object.values(markers.current).forEach(marker => marker.remove());
+    markers.current = {};
+
+    mediaItems.forEach((item: MediaItem) => {
+      const { _id, lat, lng, title, description, url } = item;
+      const lngLat: [number, number] = [parseFloat(lng.toString()), parseFloat(lat.toString())];
+
+      const markerElement = document.createElement('div');
+      markerElement.className = 'custom-marker';
+      markerElement.style.fontSize = '50px';
+      markerElement.style.color = 'red';
+      markerElement.style.cursor = 'pointer';
+      markerElement.innerHTML = _id === selectedMarkerId ? '•' : '◦';
+
+      markerElement.addEventListener('mouseenter', () => {
+        markerElement.style.fontSize = '70px';
+        markerElement.innerHTML = '•'
+      });
+  
+      markerElement.addEventListener('mouseleave', () => {
+        if (_id === selectedMarkerId) {
+          markerElement.style.fontSize = '50px';
+        } else {
+          markerElement.style.fontSize = '50px';
+          markerElement.innerHTML = '◦'
+        }
+      });
+
+      const marker = new mapboxgl.Marker({ element: markerElement })
+        .setLngLat(lngLat)
+        .addTo(map.current!);
+      
+      marker.getElement().addEventListener('click', () => {
+        onMarkerClick(_id, { title, description, contentUrl: url });
+        console.log("Item ID:", _id)
+      });
+
+      markers.current[_id] = marker;
+    });
+  }, [mapLoaded, mediaItems, onMarkerClick, selectedMarkerId]);
+
+  // Update marker appearance when selectedMarkerId changes
+  useEffect(() => {
+    Object.entries(markers.current).forEach(([id, marker]) => {
+      const element = marker.getElement().querySelector('.custom-marker') as HTMLElement;
+      if (element) {
+        element.innerHTML = id === selectedMarkerId ? '•' : '◦';
+      }
+    });
+  }, [selectedMarkerId]);
 
   return (
     // add min-h-screen ?
