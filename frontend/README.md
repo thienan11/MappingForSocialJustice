@@ -1,50 +1,44 @@
-# React + TypeScript + Vite
+# Mapping For Social Justice Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This directory contains the frontend for the Mapping For Social Justice Archiving Platform, built with [Vite](https://vite.dev/), [React](https://react.dev/), and [TypeScript](https://www.typescriptlang.org/). It is currently hosted at https://mfsj.netlify.app/
 
-Currently, two official plugins are available:
+## Getting Started with Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Before you begin, make sure you have [Node.js](https://nodejs.org/en) installed on your system. It is recommended that you use a Node.js version manager such as [Node Version Manager (nvm)](https://github.com/nvm-sh/nvm#installing-and-updating) or [Fast Node Manager (fnm)](https://github.com/Schniz/fnm#installation).
+  - Check the [Node.js download instructions](https://nodejs.org/en/download) for additional installation options.
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+After installing either nvm or fnm, go to the `frontend` directory:
+```shell
+cd frontend
 ```
 
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
+Install the Node.js version specified in the .nvmrc if that version isn't installed on your system:
+```shell
+# If using nvm
+nvm install
 
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
+# If using fnm
+fnm install
 ```
+
+Once the installation is complete, switch to that version:
+```shell
+# If using nvm
+nvm use
+
+# If using fnm
+fnm use
+```
+
+Within the `frontend` directory, install the necessary NPM packages:
+```shell
+npm install
+```
+
+When that's done, you need to setup your `.env` file. On the `frontend` directory, you should see a file called `.env.example`. That file already contains a written guide to get the variables you need.
+
+Finally, start the live server:
+```shell
+npm run dev
+```
+This will launch the frontend, and you can access it at http://localhost:5173/.
