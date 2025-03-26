@@ -3,4 +3,6 @@ export interface MapProps {
   onMarkerClick: (id: string, content: { title: string; description: string; contentUrl: string }) => void;
   setClearPreviewMarker: (clearMarkerFunction: () => void) => void;
   selectedMarkerId: string | null;
+  showPersonModel?: boolean;
+  modelPosition?: [number, number];
 }
