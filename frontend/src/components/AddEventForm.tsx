@@ -58,69 +58,80 @@ const AddEventForm: React.FC<AddEventFormProps> = ({ location, onClose }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 bg-white rounded-lg max-w-3xl mx-auto">
-      <h2 className="text-3xl font-semibold mb-4">Upload Media</h2>
-      <div className="mb-4">
-        <label className="block mb-4 text-lg text-gray-700" htmlFor="title">
-          Title:
-          <input 
-            id="title"
-            type="text" 
-            value={title} 
-            onChange={(e) => setTitle(e.target.value)} 
-            className="form-input mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" 
-          />
-        </label>
-      </div>
-      <div className="mb-4">
-        <label className="block mb-4 text-lg text-gray-700" htmlFor="description">
-          Description:
-          <textarea 
-            id="description"
-            value={description} 
-            onChange={(e) => setDescription(e.target.value)} 
-            className="form-textarea mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" 
-          />
-        </label>
-      </div>
-      <div className="mb-4">
-        {!isUploading && (
-          <label className="block mb-4 text-lg text-gray-700" htmlFor="file">
-          File:
-          <input 
-            id="file"
-            type="file" 
-            onChange={(e) => setFile(e.target.files?.[0] || null)} 
-            className="form-input mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" 
-          />
-          </label>
-        )}
-      </div>
-      <div className="mb-4">
-        <strong className="mb-4 text-lg text-gray-700">Coordinates:</strong> 
-        <div>Lat: {location.lat.toFixed(4)}, Lng: {location.lng.toFixed(4)}</div>
-      </div>
-      {isUploading && (
+    <div className="p-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <h2 className="text-3xl font-semibold mb-4 text-center">Upload Media</h2>
         <div className="mb-4">
-          <Loading />
+          <label className="block mb-4 text-lg text-gray-700" htmlFor="title">
+            <p>Title:</p>
+            <input 
+              id="title"
+              type="text" 
+              value={title} 
+              onChange={(e) => setTitle(e.target.value)}
+              // placeholder="Title"
+              className="form-input p-3 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 sm:text-sm" 
+            />
+          </label>
         </div>
-      )}
-      <div className="flex justify-center space-x-4">
-        {!isUploading && (
-          <button 
-            type="submit" 
-            className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-          >
-            Upload
-          </button>
+        <div className="mb-4">
+          <label className="block mb-4 text-lg text-gray-700" htmlFor="description">
+            <p>Description:</p>
+            <textarea 
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)} 
+              // placeholder="Description"
+              className="form-textarea p-3 mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 sm:text-sm" 
+            />
+          </label>
+        </div>
+        <div className="mb-4 pt-4">
+          {!isUploading && (
+            <label className="block mb-4 text-lg text-gray-700" htmlFor="file">
+            {/* File: */}
+            <input 
+              id="file"
+              type="file" 
+              onChange={(e) => setFile(e.target.files?.[0] || null)} 
+              className="form-input mt-1 block w-full border-gray-300 focus:outline-none focus:ring-0 sm:text-sm" 
+            />
+            </label>
+          )}
+        </div>
+        <div className="mb-6">
+          <strong className="text-lg text-gray-700 block mb-2">Coordinates:</strong> 
+          <div className="flex space-x-4">
+            <div className="px-4 py-2 text-md bg-gray-200 text-gray-800 rounded-full shadow-sm flex items-center justify-center w-36">
+              Lat: {location.lat.toFixed(4)}
+            </div>
+            <div className="px-4 py-2 text-md bg-gray-200 text-gray-800 rounded-full shadow-sm flex items-center justify-center w-36">
+              Lng: {location.lng.toFixed(4)}
+            </div>
+          </div>
+        </div>
+        {isUploading && (
+          <div className="mb-4">
+            <Loading />
+          </div>
         )}
-        {!isUploading && (
-          <button type="button" onClick={handleCancel} className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
-            Cancel
-          </button>
-        )}
-      </div>
-    </form>
+        <div className="flex justify-center space-x-4 pt-10">
+          {!isUploading && (
+            <button 
+              type="submit" 
+              className="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-sm hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+            >
+              Upload
+            </button>
+          )}
+          {!isUploading && (
+            <button type="button" onClick={handleCancel} className="px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
+              Cancel
+            </button>
+          )}
+        </div>
+      </form>
+    </div>
   );
 };
 

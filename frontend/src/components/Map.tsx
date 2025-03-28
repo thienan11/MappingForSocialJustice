@@ -13,7 +13,7 @@ const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:400
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
 mapboxgl.accessToken = mapboxToken;
 
-const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPreviewMarker, selectedMarkerId }) => {
+const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPreviewMarker, selectedMarkerId, selectedMarkerIds }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   // const mapRef = useRef<mapboxgl.Map | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -189,24 +189,35 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
       const { _id, lat, lng, title, description, url } = item;
       const lngLat: [number, number] = [parseFloat(lng.toString()), parseFloat(lat.toString())];
 
+      // Get marker number if it's selected
+      const isSelected = selectedMarkerIds.includes(_id);
+      const isActive = _id === selectedMarkerId;
+      const markerNumber = isSelected ? selectedMarkerIds.indexOf(_id) + 1 : null;
+
       const markerElement = document.createElement('div');
       markerElement.className = 'custom-marker';
-      markerElement.style.fontSize = '50px';
-      markerElement.style.color = 'red';
+      markerElement.style.fontSize = isSelected ? '50px' : '50px';
+      markerElement.style.color = isActive ? '#ef4444' : isSelected ? '#f87171' : '#dc2626';
       markerElement.style.cursor = 'pointer';
-      markerElement.innerHTML = _id === selectedMarkerId ? '•' : '◦';
+      
+      // If selected, show the number, otherwise show a circle
+      if (isSelected) {
+        markerElement.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background-color: ${isActive ? '#ef4444' : '#f87171'}; color: white; border-radius: 50%; border: 2px solid white; font-size: 14px;">${markerNumber}</div>`;
+      } else {
+        markerElement.innerHTML = '◦';
+      }
 
       markerElement.addEventListener('mouseenter', () => {
         markerElement.style.fontSize = '70px';
-        markerElement.innerHTML = '•'
+        if (!isSelected) {
+          markerElement.innerHTML = '•';
+        }
       });
   
       markerElement.addEventListener('mouseleave', () => {
-        if (_id === selectedMarkerId) {
-          markerElement.style.fontSize = '50px';
-        } else {
-          markerElement.style.fontSize = '50px';
-          markerElement.innerHTML = '◦'
+        markerElement.style.fontSize = '50px';
+        if (!isSelected) {
+          markerElement.innerHTML = '◦';
         }
       });
 
@@ -221,17 +232,7 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
 
       markers.current[_id] = marker;
     });
-  }, [mapLoaded, mediaItems, onMarkerClick, selectedMarkerId]);
-
-  // Update marker appearance when selectedMarkerId changes
-  useEffect(() => {
-    Object.entries(markers.current).forEach(([id, marker]) => {
-      const element = marker.getElement().querySelector('.custom-marker') as HTMLElement;
-      if (element) {
-        element.innerHTML = id === selectedMarkerId ? '•' : '◦';
-      }
-    });
-  }, [selectedMarkerId]);
+  }, [mapLoaded, mediaItems, onMarkerClick, selectedMarkerId, selectedMarkerIds]);
 
   return (
     // add min-h-screen ?
@@ -254,6 +255,13 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
             ref={mapContainer}
             className="h-full w-full rounded-lg overflow-hidden"
           />
+
+          {/* Selection counter badge */}
+          {selectedMarkerIds.length > 0 && (
+            <div className="absolute bottom-10 right-4 z-10 bg-red-500 text-white px-3 py-1 rounded-full font-semibold">
+              {selectedMarkerIds.length} selected
+            </div>
+          )}
         </div>
       </div>
 
