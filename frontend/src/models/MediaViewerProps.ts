@@ -15,4 +15,6 @@ export interface MediaViewerProps {
   toggleItemSelection: (id: string) => void;
   clearSelections: () => void;
   onClose: () => void;
+  hoveredItemId: string | null;
+  onItemHover: (id: string | null) => void;
 }

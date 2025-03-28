@@ -4,4 +4,6 @@ export interface MapProps {
   setClearPreviewMarker: (clearMarkerFunction: () => void) => void;
   selectedMarkerId: string | null;
   selectedMarkerIds: string[]; // prop for multi-selection
+  hoveredItemId: string | null;
+  onMarkerHover: (id: string | null) => void;
 }

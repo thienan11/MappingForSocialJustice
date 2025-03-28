@@ -9,7 +9,9 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
   setActiveMediaItem,
   toggleItemSelection,
   clearSelections,
-  onClose
+  onClose,
+  hoveredItemId,
+  onItemHover
 }) => {
 
   // Get active media item
@@ -86,36 +88,52 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
       {selectedMediaItems.length > 0 && (
         <div>
           <div className="h-20 overflow-x-auto">
-            <div className="flex p-2 gap-2">
-              {selectedMediaItems.map((id, index) => (
-                <div
-                  key={id}
-                  className={`
-                    relative flex-shrink-0 h-16 w-16 rounded-md overflow-hidden cursor-pointer transition-all
-                    ${activeMediaItem === id ? 'ring-2 ring-red-500' : ''}
-                  `}
-                  onClick={() => setActiveMediaItem(id)}
-                >
-                  <img
-                    src={getThumbnail(id)}
-                    alt={mediaItems[id]?.title}
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute top-0 left-0 bg-red-500 text-white px-1 py-0.5 text-xs">
-                    {index + 1}
-                  </div>
-                  <button
-                    className="absolute top-0 right-0 h-5 w-5 flex items-center justify-center bg-white/80 hover:bg-red-500 hover:text-white rounded-bl-md"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleItemSelection(id);
+            <div className="flex p-2 gap-3">
+              {selectedMediaItems.map((id, index) => {
+                const isHovered = id === hoveredItemId;
+                const isActive = activeMediaItem === id;
+
+                return (
+                  <div
+                    key={id}
+                    className="relative flex-shrink-0 h-16 w-16 rounded-md overflow-hidden cursor-pointer transition-all duration-200"
+                    style={{
+                      // transform: isHovered ? 'scale(0.9)' : 'scale(1)',
+                      zIndex: isHovered ? 10 : isActive ? 5 : 1,
+                      outline: isActive
+                        ? isHovered
+                          ? '4px solid #ef4444' // Thicker border when both active and hovered
+                          : '2px solid #ef4444' // Normal border when just active
+                        : isHovered
+                          ? '3px solid #ef4444' // Border when just hovered (not active)
+                          : 'none', // No border when neither active nor hovered
+                      outlineOffset: '2px',
                     }}
+                    onClick={() => setActiveMediaItem(id)}
+                    onMouseEnter={() => onItemHover(id)}
+                    onMouseLeave={() => onItemHover(null)}
                   >
-                    <X className="h-3 w-3" />
-                    <span className="sr-only">Remove</span>
-                  </button>
-                </div>
-              ))}
+                    <img
+                      src={getThumbnail(id)}
+                      alt={mediaItems[id]?.title}
+                      className="h-full w-full object-cover"
+                    />
+                    <div className="absolute top-0 left-0 bg-red-500 text-white px-1 py-0.5 text-xs">
+                      {index + 1}
+                    </div>
+                    <button
+                      className="absolute top-0 right-0 h-5 w-5 flex items-center justify-center bg-white/80 hover:bg-red-500 hover:text-white rounded-bl-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleItemSelection(id);
+                      }}
+                    >
+                      <X className="h-3 w-3" />
+                      <span className="sr-only">Remove</span>
+                    </button>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

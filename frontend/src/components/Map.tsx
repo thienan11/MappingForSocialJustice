@@ -13,7 +13,7 @@ const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:400
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
 mapboxgl.accessToken = mapboxToken;
 
-const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPreviewMarker, selectedMarkerId, selectedMarkerIds }) => {
+const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPreviewMarker, selectedMarkerId, selectedMarkerIds, hoveredItemId, onMarkerHover }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   // const mapRef = useRef<mapboxgl.Map | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -192,17 +192,41 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
       // Get marker number if it's selected
       const isSelected = selectedMarkerIds.includes(_id);
       const isActive = _id === selectedMarkerId;
+      const isHovered = _id === hoveredItemId;
       const markerNumber = isSelected ? selectedMarkerIds.indexOf(_id) + 1 : null;
 
       const markerElement = document.createElement('div');
       markerElement.className = 'custom-marker';
       markerElement.style.fontSize = isSelected ? '50px' : '50px';
-      markerElement.style.color = isActive ? '#ef4444' : isSelected ? '#f87171' : '#dc2626';
+
+      // Determine marker color based on state (hovered takes precedence)
+      const markerColor = isHovered ? '#ff0000' : isActive ? '#ef4444' : isSelected ? '#f87171' : '#dc2626';
+      markerElement.style.color = markerColor;
       markerElement.style.cursor = 'pointer';
       
+      // Apply transform scale for hover effect
+      // markerElement.style.transition = 'transform 0.2s ease, filter 0.2s ease';
+      // markerElement.style.transform = isHovered ? 'scale(1.4)' : 'scale(1)';
+      markerElement.style.filter = isHovered ? 'drop-shadow(0 0 8px rgba(255,0,0,0.8))' : 'none';
+
       // If selected, show the number, otherwise show a circle
       if (isSelected) {
-        markerElement.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; background-color: ${isActive ? '#ef4444' : '#f87171'}; color: white; border-radius: 50%; border: 2px solid white; font-size: 14px;">${markerNumber}</div>`;
+        const bgColor = isHovered ? '#ff0000' : isActive ? '#ef4444' : '#f87171';
+        markerElement.innerHTML = `
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background-color: ${bgColor};
+            color: white;
+            border-radius: 50%;
+            border: 2px solid white;
+            font-size: 14px;
+            ${isHovered ? 'box-shadow: 0 0 10px rgba(255,0,0,0.8);' : ''}
+          ">${markerNumber}</div>
+        `;
       } else {
         markerElement.innerHTML = '◦';
       }
@@ -212,6 +236,7 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
         if (!isSelected) {
           markerElement.innerHTML = '•';
         }
+        onMarkerHover(_id);
       });
   
       markerElement.addEventListener('mouseleave', () => {
@@ -219,6 +244,7 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
         if (!isSelected) {
           markerElement.innerHTML = '◦';
         }
+        onMarkerHover(null);
       });
 
       const marker = new mapboxgl.Marker({ element: markerElement })
@@ -232,7 +258,7 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
 
       markers.current[_id] = marker;
     });
-  }, [mapLoaded, mediaItems, onMarkerClick, selectedMarkerId, selectedMarkerIds]);
+  }, [mapLoaded, mediaItems, onMarkerClick, selectedMarkerId, selectedMarkerIds, hoveredItemId, onMarkerHover]);
 
   return (
     // add min-h-screen ?

@@ -20,6 +20,8 @@ const MapView: React.FC = () => {
   const [mediaItems, setMediaItems] = useState<{ [id: string]: { title: string; description: string; contentUrl: string } }>({});
   const [viewMode, setViewMode] = useState<"full" | "split">("full");
 
+  const [hoveredItemId, setHoveredItemId] = useState<string | null>(null);
+
   const handleDoubleClick = (location: { lat: number; lng: number }) => {
     setSelectedLocation(location);
     setShowAddEventForm(true);
@@ -66,7 +68,7 @@ const MapView: React.FC = () => {
         if (newSelectedItems.length > 0) {
           // Set the first item in the remaining selection as active
           setActiveMediaItem(null); // Reset first
-          setTimeout(() => setActiveMediaItem(newSelectedItems[0]), 50); // Then set new active
+          setActiveMediaItem(newSelectedItems[0]); // Then set new active
         } else {
           // No items left
           setActiveMediaItem(null);
@@ -86,12 +88,10 @@ const MapView: React.FC = () => {
     // If this is the first item being selected, make it active
     if (selectedMediaItems.length === 0) {
       setActiveMediaItem(null); // Reset first
-      setTimeout(() => {
-        setActiveMediaItem(id);
-        if (viewMode === "full") {
-          setViewMode("split");
-        }
-      }, 50);
+      setActiveMediaItem(id);
+      if (viewMode === "full") {
+        setViewMode("split");
+      }
     }
 
     // If we are in the process of adding a new event, cancel it
@@ -126,6 +126,10 @@ const MapView: React.FC = () => {
     setSelectedLocation(null);
     if (clearPreviewMarker) clearPreviewMarker();
     // setSelectedMarkerId(null);
+  };
+
+  const handleItemHover = (id: string | null) => {
+    setHoveredItemId(id);
   };
 
   // Effect to handle map resize when selections change
@@ -180,6 +184,8 @@ const MapView: React.FC = () => {
               setClearPreviewMarker={setClearPreviewMarker}
               selectedMarkerId={activeMediaItem}
               selectedMarkerIds={selectedMediaItems}
+              hoveredItemId={hoveredItemId}
+              onMarkerHover={handleItemHover}
             />
           </div>
         </div>
@@ -209,6 +215,8 @@ const MapView: React.FC = () => {
                 toggleItemSelection={(id) => handleMarkerClick(id, mediaItems[id])}
                 clearSelections={clearSelections}
                 onClose={handleCloseMediaViewer}
+                hoveredItemId={hoveredItemId}
+                onItemHover={handleItemHover}
               />
             </div>
           </div>
