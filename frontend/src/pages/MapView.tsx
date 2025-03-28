@@ -206,7 +206,7 @@ const MapView: React.FC = () => {
         {/* Media Viewer Panel */}
         {viewMode === "split" && !showAddEventForm && (
           <div className="w-1/2">
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-300 h-full flex flex-col">
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-300 h-[calc(91vh-25px)] flex flex-col">
               <MediaViewer
                 selectedMediaItems={selectedMediaItems}
                 mediaItems={mediaItems}

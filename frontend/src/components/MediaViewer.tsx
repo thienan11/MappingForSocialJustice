@@ -1,6 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MediaViewerProps } from '../models/MediaViewerProps';
-import { ChevronLeft, ChevronRight, X, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, MapPin, Maximize2, LayoutList, Play } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+type ViewMode = "single" | "list";
 
 const MediaViewer: React.FC<MediaViewerProps> = ({ 
   selectedMediaItems,
@@ -13,6 +19,11 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
   hoveredItemId,
   onItemHover
 }) => {
+  // view mode state
+  const [viewMode, setViewMode] = useState<ViewMode>("single");
+
+  // Track which videos are playing in list view
+  const [playingVideos, setPlayingVideos] = useState<{[id: string]: boolean}>({});
 
   // Get active media item
   const getActiveMediaItem = () => {
@@ -25,19 +36,24 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
   const isVideo = activeItem ? /\.(mp4|mov)$/i.test(activeItem.contentUrl) : false; // i flag for case-insensitive
 
   // Determine MIME type for video
-  const mimeType = activeItem && isVideo
-    ? activeItem.contentUrl.endsWith('.mp4') 
-      ? 'video/mp4' 
-      : activeItem.contentUrl.endsWith('.mov')
-        ? 'video/quicktime'
-        : ''
-    : '';
+  // const mimeType = activeItem && isVideo
+  //   ? activeItem.contentUrl.endsWith('.mp4')
+  //     ? 'video/mp4'
+  //     : activeItem.contentUrl.endsWith('.mov')
+  //       ? 'video/quicktime'
+  //       : ''
+  //   : '';
+  const getMimeType = (url: string) => {
+    if (url.endsWith('.mp4')) return 'video/mp4';
+    if (url.endsWith('.mov')) return 'video/quicktime';
+    return '';
+  };
     
   // Log for debugging
   if (activeItem) {
     console.log('contentUrl:', activeItem.contentUrl);
     console.log('isVideo:', isVideo);
-    console.log('mimeType:', mimeType);
+    console.log('mimeType:', getMimeType(activeItem.contentUrl));
   }
 
   const getThumbnail = (id: string) => {
@@ -57,12 +73,27 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
     return item.contentUrl;
   };
 
+  const getSelectedItems = () => {
+    return selectedMediaItems.map(id => ({
+      id,
+      ...mediaItems[id]
+    }));
+  };
+
+  // Toggle video playback in list view
+  const toggleVideoPlayback = (id: string) => {
+    setPlayingVideos(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
+
   return (
     // <div className="w-1/2 h-full bg-white overflow-hidden flex flex-col border-l border-gray-200">
-    <div>
+    // Make the container take the full height of its parent
+    <div className="flex flex-col h-full">
       {/* Media preview header */}
-      {/* border-b */}
-      <div className="p-3 flex items-center justify-between">
+      <div className="p-3 flex items-center justify-end">
         <div className="flex items-center gap-2">
           {/* <button 
             onClick={onClose}
@@ -75,20 +106,43 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
         </div>
 
         {selectedMediaItems.length > 0 && (
-          <button 
-            onClick={clearSelections}
-            className="px-3 py-1 text-sm border border-gray-300 rounded-md hover:bg-gray-100"
-          >
-            Clear All
-          </button>
+          <div className="flex">
+            <div className="flex bg-muted rounded-md mr-3">
+              <Button
+                variant={viewMode === "single" ? "default" : "ghost"}
+                size="sm"
+                className="h-7 px-2"
+                onClick={() => setViewMode("single")}
+              >
+                <Maximize2 className="h-4 w-4" />
+                <span className="sr-only">Single view</span>
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "ghost"}
+                size="sm"
+                className="h-7 px-2"
+                onClick={() => setViewMode("list")}
+              >
+                <LayoutList className="h-4 w-4" />
+                <span className="sr-only">List view</span>
+              </Button>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={clearSelections}
+            >
+              Clear All
+            </Button>
+          </div>
         )}
       </div>
 
-      {/* Selected items strip */}
-      {selectedMediaItems.length > 0 && (
-        <div>
-          <div className="h-20 overflow-x-auto">
-            <div className="flex p-2 gap-3">
+      {/* Selected items strip - only on single mode */}
+      {selectedMediaItems.length > 0 && viewMode === "single" && (
+        <div className="flex-shrink-0">
+          <div className="h-24 overflow-x-auto">
+            <div className="flex p-2 gap-4 mx-3">
               {selectedMediaItems.map((id, index) => {
                 const isHovered = id === hoveredItemId;
                 const isActive = activeMediaItem === id;
@@ -96,9 +150,9 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
                 return (
                   <div
                     key={id}
-                    className="relative flex-shrink-0 h-16 w-16 rounded-md overflow-hidden cursor-pointer transition-all duration-200"
+                    className="relative flex-shrink-0 h-20 w-20 rounded-md overflow-hidden cursor-pointer transition-all duration-200"
                     style={{
-                      // transform: isHovered ? 'scale(0.9)' : 'scale(1)',
+                      transform: isHovered ? 'scale(1.06)' : 'scale(1)',
                       zIndex: isHovered ? 10 : isActive ? 5 : 1,
                       outline: isActive
                         ? isHovered
@@ -139,88 +193,219 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
         </div>
       )}
 
-      {/* Active item preview */}
-      {activeItem ? (
-        <div className="flex-1 overflow-auto p-4">
-          <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden mb-4">
-            {isVideo ? (
-              <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
-                <video
-                  key={activeItem.contentUrl} // key that changes with the content URL
-                  controls
-                  className="absolute top-0 left-0 w-full h-full object-contain"
-                  style={{ maxWidth: '100%', maxHeight: '100%' }}
-                >
-                  <source src={activeItem.contentUrl} type={mimeType} />
-                  Your browser does not support the video tag.
-                </video>
-              </div>
-            ) : (
-              <img
-                src={activeItem.contentUrl}
-                alt={activeItem.title}
-                className="w-full h-full object-contain"
-              />
-            )}
-          </div>
+      {/* Main content area */}
+      <div className="flex-grow overflow-hidden">
+        <ScrollArea className="h-full w-full">
+          {selectedMediaItems.length > 0 ? (
+            <>
+              {/* Single item view */}
+              {viewMode === "single" && activeItem && (
+                <div className="p-4">
+                  <div className="relative aspect-video bg-gray-100 rounded-lg overflow-hidden mb-4">
+                    {isVideo ? (
+                      <div className="relative w-full h-full">
+                        <video
+                          key={activeItem.contentUrl}
+                          controls
+                          className="absolute top-0 left-0 w-full h-full object-contain"
+                        >
+                          <source src={activeItem.contentUrl} type={getMimeType(activeItem.contentUrl)} />
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
+                    ) : (
+                      <img
+                        src={activeItem.contentUrl}
+                        alt={activeItem.title}
+                        className="w-full h-full object-contain"
+                      />
+                    )}
+                  </div>
 
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-xl font-semibold">{activeItem.title}</h3>
-              <div className="flex items-center gap-2 mt-1">
-                <span className="px-2 py-0.5 text-xs bg-gray-100 rounded-full">
-                  {isVideo ? 'Video' : 'Image'}
-                </span>
-              </div>
-            </div>
+                  <div className="space-y-4">
+                    <div>
+                      <h3 className="text-xl font-semibold">{activeItem.title}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant={isVideo ? "secondary" : "outline"}>
+                          {isVideo ? 'Video' : 'Image'}
+                        </Badge>
+                      </div>
+                    </div>
 
-            <div>
-              <p className="text-gray-700">{activeItem.description}</p>
-            </div>
+                    <div>
+                      <p className="text-gray-700">{activeItem.description}</p>
+                    </div>
 
-            {/* Navigation between items */}
-            {selectedMediaItems.length > 1 && (
-              <div className="pt-4 mt-4 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <button
-                    className="px-3 py-1 flex items-center gap-1 border border-gray-300 rounded-md hover:bg-gray-100"
-                    onClick={() => {
-                      const currentIndex = selectedMediaItems.indexOf(activeMediaItem!);
-                      const prevIndex = (currentIndex - 1 + selectedMediaItems.length) % selectedMediaItems.length;
-                      setActiveMediaItem(selectedMediaItems[prevIndex]);
-                    }}
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                    Previous
-                  </button>
-                  <span className="text-sm text-gray-500">
-                    {selectedMediaItems.indexOf(activeMediaItem!) + 1} of {selectedMediaItems.length}
-                  </span>
-                  <button
-                    className="px-3 py-1 flex items-center gap-1 border border-gray-300 rounded-md hover:bg-gray-100"
-                    onClick={() => {
-                      const currentIndex = selectedMediaItems.indexOf(activeMediaItem!);
-                      const nextIndex = (currentIndex + 1) % selectedMediaItems.length;
-                      setActiveMediaItem(selectedMediaItems[nextIndex]);
-                    }}
-                  >
-                    Next
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
+                    {/* Navigation between items */}
+                    {selectedMediaItems.length > 1 && (
+                      <div className="pt-4 mt-4 border-t border-gray-200">
+                        <div className="flex items-center justify-between">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const currentIndex = selectedMediaItems.indexOf(activeMediaItem!);
+                              const prevIndex = (currentIndex - 1 + selectedMediaItems.length) % selectedMediaItems.length;
+                              setActiveMediaItem(selectedMediaItems[prevIndex]);
+                            }}
+                          >
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous
+                          </Button>
+                          <span className="text-sm text-gray-500">
+                            {selectedMediaItems.indexOf(activeMediaItem!) + 1} of {selectedMediaItems.length}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              const currentIndex = selectedMediaItems.indexOf(activeMediaItem!);
+                              const nextIndex = (currentIndex + 1) % selectedMediaItems.length;
+                              setActiveMediaItem(selectedMediaItems[nextIndex]);
+                            }}
+                          >
+                            Next
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+              )}
+
+              {/* List View */}
+              {viewMode === "list" && (
+                <div className="p-4 space-y-4">
+                  {getSelectedItems().map((item, index) => {
+                    const isHovered = item.id === hoveredItemId;
+                    const isVideo = /\.(mp4|mov)$/i.test(item.contentUrl);
+                    const isPlaying = playingVideos[item.id] || false;
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={cn(
+                          "border rounded-lg overflow-hidden transition-all",
+                          isHovered ? "ring-2 ring-red-500" : ""
+                        )}
+                        onMouseEnter={() => onItemHover(item.id)}
+                        onMouseLeave={() => onItemHover(null)}
+                      >
+                        <div className="p-3 border-b flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <Badge className="bg-red-500 text-white h-6 w-6 flex items-center justify-center rounded-full p-0">
+                              {index + 1}
+                            </Badge>
+                            <h3 className="font-medium">{item.title}</h3>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 rounded-full hover:bg-gray-100"
+                              onClick={() => {
+                                setActiveMediaItem(item.id);
+                                setViewMode("single");
+                              }}
+                            >
+                              <Maximize2 className="h-4 w-4" />
+                              <span className="sr-only">View full</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7 rounded-full hover:bg-red-100"
+                              onClick={() => toggleItemSelection(item.id)}
+                            >
+                              <X className="h-4 w-4" />
+                              <span className="sr-only">Remove</span>
+                            </Button>
+                          </div>
+                        </div>
+                        <div className="flex flex-col md:flex-row">
+                          <div className="relative md:w-1/2 aspect-video bg-gray-100">
+                            {isVideo ? (
+                              <>
+                                {isPlaying ? (
+                                  <video
+                                    key={`playing-${item.contentUrl}`}
+                                    controls
+                                    autoPlay
+                                    className="w-full h-full object-contain"
+                                  >
+                                    <source src={item.contentUrl} type={getMimeType(item.contentUrl)} />
+                                    Your browser does not support the video tag.
+                                  </video>
+                                ) : (
+                                  <div className="relative w-full h-full">
+                                    <img
+                                      src={getThumbnail(item.id)}
+                                      alt={item.title}
+                                      className="w-full h-full object-cover"
+                                    />
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="absolute inset-0 w-full h-full flex items-center justify-center bg-black/30 hover:bg-black/40 text-white rounded-none"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleVideoPlayback(item.id);
+                                      }}
+                                    >
+                                      <Play className="h-12 w-12" />
+                                      <span className="sr-only">Play video</span>
+                                    </Button>
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <img
+                                src={item.contentUrl}
+                                alt={item.title}
+                                className="w-full h-full object-cover"
+                              />
+                            )}
+                          </div>
+                          <div className="p-4 md:w-1/2">
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Badge variant={isVideo ? "secondary" : "outline"}>
+                                  {isVideo ? 'Video' : 'Image'}
+                                </Badge>
+                                {isVideo && isPlaying && (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => toggleVideoPlayback(item.id)}
+                                  >
+                                    Stop Playing
+                                  </Button>
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-gray-700">{item.description}</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="h-full flex items-center justify-center">
+              <div className="text-center p-4">
+                <MapPin className="w-12 h-12 mx-auto text-gray-300 mb-2" />
+                <h3 className="text-lg font-medium">No Media Selected</h3>
+                <p className="text-gray-500">Select items from the map</p>
               </div>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center p-4">
-            <MapPin className="w-12 h-12 mx-auto text-gray-300 mb-2" />
-            <h3 className="text-lg font-medium">No Media Selected</h3>
-            <p className="text-gray-500">Select items from the map</p>
-          </div>
-        </div>
-      )}
+            </div>
+          )}
+        </ScrollArea>
+      </div>
     </div>
   );
 };
