@@ -112,6 +112,7 @@ const MapView: React.FC = () => {
     setActiveMediaItem(null);
   };
 
+  // might not need since clearSelections also closes the mediaviewer (due to useEffect below)
   const handleCloseMediaViewer = () => {
     // setShowMediaViewer(false);
     // setSelectedMarkerId(null);
@@ -157,13 +158,13 @@ const MapView: React.FC = () => {
       {/* Help Modal */}
       {showHelpModal && (
         <Modal
-          title="How to Use"
+          title="How to Interact with the Map"
           content={
             <div>
-              <p>Here's how you can interact with the map:</p>
               <ul className="list-disc ml-5 my-2">
+                <li>Use the search bar to find locations on the map.</li>
                 <li>Double-click on the map to add a new event at the selected location.</li>
-                <li>Click on a marker to view media associated with that location.</li>
+                <li>Click on a marker to view media associated with that location. Choose multiple markers to compare different entries.</li>
               </ul>
             </div>
           }

@@ -15,7 +15,7 @@ const MediaViewer: React.FC<MediaViewerProps> = ({
   setActiveMediaItem,
   toggleItemSelection,
   clearSelections,
-  onClose,
+  // onClose,
   hoveredItemId,
   onItemHover
 }) => {

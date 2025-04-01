@@ -33,7 +33,7 @@ const Home: React.FC = () => {
           </button>
 
           <div className="mt-12">
-            <img src="/images/demo.png" alt="Demo" width="950px" className="mx-auto" />
+            <img src="/images/preview.png" alt="Demo" width="950px" className="mx-auto" />
           </div>
         </div>
       </div>
