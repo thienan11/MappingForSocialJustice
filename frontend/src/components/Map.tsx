@@ -145,6 +145,14 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
       const control = new CoordinateZoomControl();
       map.current.addControl(control, "top-right");
       console.log("Custom control added");
+
+      // Create a wrapper div
+      const wrapper = document.createElement('div');
+      wrapper.className = 'hidden sm:block'; // hide on mobile
+      wrapper.appendChild(control.onAdd(map.current));
+
+      // Add the wrapper manually
+      map.current.getContainer().appendChild(wrapper);
     }
 
     // Cleanup geocoder on component unmount
@@ -268,12 +276,12 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
       transition={{ duration: 1 }}
       className="map-container"
     >
-      <div className="flex justify-center items-center p-6 bg-white">
+      <div className="flex justify-center items-center p-2 sm:p-6 bg-white">
         <div className="w-full max-w-screen-lg h-[80vh] bg-white p-2 rounded-lg relative">
           {/* Geocoder Searchbox */}
           <div
             ref={geocoderContainer}
-            className="absolute top-4 left-4 z-10 w-80"
+            className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 w-[90%] max-w-xs sm:left-4 sm:translate-x-0 sm:max-w-sm md:max-w-md"
           />
 
           {/* Map Container */}
