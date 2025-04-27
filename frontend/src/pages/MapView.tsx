@@ -147,7 +147,7 @@ const MapView: React.FC = () => {
     <div className="flex p-4">
       {/* Help Button */}
       <div
-        className="fixed bottom-4 right-4 text-black-500 p-3 rounded-full hover:text-gray-600 cursor-pointer z-50"
+        className="fixed bottom-2 md:bottom-4 right-2 md:right-4 text-black-500 p-3 rounded-full hover:text-gray-600 cursor-pointer z-50"
         onClick={() => setShowHelpModal(true)}
         aria-label="Help"
         role="button" // To make it accessible as a clickable element?
@@ -173,10 +173,14 @@ const MapView: React.FC = () => {
       )}
 
       {/* <div className="flex h-full w-full overflow-hidden"> */}
-      <div className="flex w-full gap-4">
+      <div className="flex w-full gap-4 flex-col md:flex-row">
         {/* Map Container */}
         <div 
-          className={`relative h-full ${viewMode === "split" || showAddEventForm ? "w-1/2" : "w-full"} transition-all duration-300 ease-in-out`} // transition-all duration-300
+          className={`
+            relative md:h-full
+            ${viewMode === "split" || showAddEventForm ? "md:w-1/2 h-[50vh]" : "md:w-full h-[80vh]"}
+            transition-all duration-300 ease-in-out
+          `} // transition-all duration-300
         >
           <div className={`h-full flex flex-col ${(viewMode === "split" || showAddEventForm) ? "rounded-lg shadow-lg overflow-hidden border border-gray-300" : ""}`}>
             <Map
@@ -187,6 +191,7 @@ const MapView: React.FC = () => {
               selectedMarkerIds={selectedMediaItems}
               hoveredItemId={hoveredItemId}
               onMarkerHover={handleItemHover}
+              viewMode={viewMode}
             />
           </div>
         </div>
@@ -194,7 +199,7 @@ const MapView: React.FC = () => {
         {/* AddEventForm Panel */}
         {showAddEventForm && selectedLocation && (
           // <div className="w-1/2 h-full bg-white overflow-hidden flex flex-col border-l border-gray-200">
-          <div className="w-1/2">
+          <div className="w-full md:w-1/2">
             <div className="rounded-lg shadow-lg overflow-hidden border border-gray-300 h-full flex flex-col">
               <AddEventForm
                 location={selectedLocation}
@@ -206,8 +211,8 @@ const MapView: React.FC = () => {
 
         {/* Media Viewer Panel */}
         {viewMode === "split" && !showAddEventForm && (
-          <div className="w-1/2">
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-300 h-[calc(91vh-25px)] flex flex-col">
+          <div className="w-full md:w-1/2">
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-gray-300 h-[50vh] md:h-[calc(91vh-25px)] flex flex-col">
               <MediaViewer
                 selectedMediaItems={selectedMediaItems}
                 mediaItems={mediaItems}

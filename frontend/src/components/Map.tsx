@@ -13,7 +13,7 @@ const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:400
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
 mapboxgl.accessToken = mapboxToken;
 
-const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPreviewMarker, selectedMarkerId, selectedMarkerIds, hoveredItemId, onMarkerHover }) => {
+const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPreviewMarker, selectedMarkerId, selectedMarkerIds, hoveredItemId, onMarkerHover, viewMode }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   // const mapRef = useRef<mapboxgl.Map | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -42,6 +42,8 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
   //   description: "",
   //   contentUrl: "",
   // });
+
+  const mapHeight = viewMode === "split" ? "h-[48vh] md:h-[80vh]" : "h-[80vh]";
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -277,7 +279,7 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
       className="map-container"
     >
       <div className="flex justify-center items-center p-2 sm:p-6 bg-white">
-        <div className="w-full max-w-screen-lg h-[80vh] bg-white p-2 rounded-lg relative">
+        <div className={`w-full max-w-screen-lg ${mapHeight} bg-white p-2 rounded-lg relative`}>
           {/* Geocoder Searchbox */}
           <div
             ref={geocoderContainer}
@@ -292,7 +294,7 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
 
           {/* Selection counter badge */}
           {selectedMarkerIds.length > 0 && (
-            <div className="absolute bottom-10 right-4 z-10 bg-red-500 text-white px-3 py-1 rounded-full font-semibold">
+            <div className="absolute bottom-4 md:bottom-12 right-4 z-10 bg-red-500 text-white px-3 py-1 rounded-full font-semibold">
               {selectedMarkerIds.length} selected
             </div>
           )}
