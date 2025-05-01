@@ -147,7 +147,7 @@ const MapView: React.FC = () => {
     <div className="flex p-4">
       {/* Help Button */}
       <div
-        className="fixed bottom-2 md:bottom-4 right-2 md:right-4 text-black-500 p-3 rounded-full hover:text-gray-600 cursor-pointer z-50"
+        className="fixed bottom-0 md:bottom-4 right-0 md:right-4 text-black-500 p-3 rounded-full hover:text-gray-600 cursor-pointer z-50"
         onClick={() => setShowHelpModal(true)}
         aria-label="Help"
         role="button" // To make it accessible as a clickable element?
