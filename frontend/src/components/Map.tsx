@@ -45,6 +45,12 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
 
   const mapHeight = viewMode === "split" ? "h-[48vh] md:h-[80vh]" : "h-[80vh]";
 
+  // Track window size changes
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
+
   useEffect(() => {
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
@@ -269,6 +275,33 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
       markers.current[_id] = marker;
     });
   }, [mapLoaded, mediaItems, onMarkerClick, selectedMarkerId, selectedMarkerIds, hoveredItemId, onMarkerHover]);
+
+  // Track window resize and viewMode changes
+  useEffect(() => {
+    // Handler to update window size in state
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize); // Add event listener
+    return () => window.removeEventListener('resize', handleResize); // Clean up
+  }, []);
+
+  // Resize map when viewMode or window size changes
+  useEffect(() => {
+    if (map.current && mapLoaded) {
+      // Use a small delay to ensure the DOM has updated
+      const resizeTimer = setTimeout(() => {
+        map.current?.resize();
+        console.log("Map resized due to layout change");
+      }, 300);
+
+      return () => clearTimeout(resizeTimer);
+    }
+  }, [viewMode, windowSize, mapLoaded]);
 
   return (
     // add min-h-screen ?

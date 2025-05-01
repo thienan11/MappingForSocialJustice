@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Map from '../components/Map';
 import AddEventForm from '../components/AddEventForm';
 import MediaViewer from '../components/MediaViewer';
@@ -134,7 +134,7 @@ const MapView: React.FC = () => {
   };
 
   // Effect to handle map resize when selections change
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedMediaItems.length === 0) {
       setViewMode("full");
       setActiveMediaItem(null);
