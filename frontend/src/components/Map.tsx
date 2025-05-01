@@ -13,7 +13,7 @@ const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:400
 const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
 mapboxgl.accessToken = mapboxToken;
 
-const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPreviewMarker, selectedMarkerId, selectedMarkerIds, hoveredItemId, onMarkerHover }) => {
+const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPreviewMarker, selectedMarkerId, selectedMarkerIds, hoveredItemId, onMarkerHover, viewMode }) => {
   const mapContainer = useRef<HTMLDivElement | null>(null);
   // const mapRef = useRef<mapboxgl.Map | null>(null);
   const map = useRef<mapboxgl.Map | null>(null);
@@ -42,6 +42,14 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
   //   description: "",
   //   contentUrl: "",
   // });
+
+  const mapHeight = viewMode === "split" ? "h-[48vh] md:h-[80vh]" : "h-[80vh]";
+
+  // Track window size changes
+  const [windowSize, setWindowSize] = useState({
+    width: window.innerWidth,
+    height: window.innerHeight
+  });
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -145,6 +153,14 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
       const control = new CoordinateZoomControl();
       map.current.addControl(control, "top-right");
       console.log("Custom control added");
+
+      // Create a wrapper div
+      const wrapper = document.createElement('div');
+      wrapper.className = 'hidden sm:block'; // hide on mobile
+      wrapper.appendChild(control.onAdd(map.current));
+
+      // Add the wrapper manually
+      map.current.getContainer().appendChild(wrapper);
     }
 
     // Cleanup geocoder on component unmount
@@ -260,6 +276,33 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
     });
   }, [mapLoaded, mediaItems, onMarkerClick, selectedMarkerId, selectedMarkerIds, hoveredItemId, onMarkerHover]);
 
+  // Track window resize and viewMode changes
+  useEffect(() => {
+    // Handler to update window size in state
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight
+      });
+    };
+
+    window.addEventListener('resize', handleResize); // Add event listener
+    return () => window.removeEventListener('resize', handleResize); // Clean up
+  }, []);
+
+  // Resize map when viewMode or window size changes
+  useEffect(() => {
+    if (map.current && mapLoaded) {
+      // Use a small delay to ensure the DOM has updated
+      const resizeTimer = setTimeout(() => {
+        map.current?.resize();
+        console.log("Map resized due to layout change");
+      }, 300);
+
+      return () => clearTimeout(resizeTimer);
+    }
+  }, [viewMode, windowSize, mapLoaded]);
+
   return (
     // add min-h-screen ?
     <motion.div
@@ -268,12 +311,12 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
       transition={{ duration: 1 }}
       className="map-container"
     >
-      <div className="flex justify-center items-center p-6 bg-white">
-        <div className="w-full max-w-screen-lg h-[80vh] bg-white p-2 rounded-lg relative">
+      <div className="flex justify-center items-center p-2 sm:p-6 bg-white">
+        <div className={`w-full max-w-screen-lg ${mapHeight} bg-white p-2 rounded-lg relative`}>
           {/* Geocoder Searchbox */}
           <div
             ref={geocoderContainer}
-            className="absolute top-4 left-4 z-10 w-80"
+            className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 w-[90%] max-w-xs sm:left-4 sm:translate-x-0 sm:max-w-sm md:max-w-md"
           />
 
           {/* Map Container */}
@@ -284,7 +327,7 @@ const Map: React.FC<MapProps> = ({ onMapDoubleClick, onMarkerClick, setClearPrev
 
           {/* Selection counter badge */}
           {selectedMarkerIds.length > 0 && (
-            <div className="absolute bottom-10 right-4 z-10 bg-red-500 text-white px-3 py-1 rounded-full font-semibold">
+            <div className="absolute bottom-4 md:bottom-12 right-4 z-10 bg-red-500 text-white px-3 py-1 rounded-full font-semibold">
               {selectedMarkerIds.length} selected
             </div>
           )}

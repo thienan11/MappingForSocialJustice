@@ -6,4 +6,5 @@ export interface MapProps {
   selectedMarkerIds: string[]; // prop for multi-selection
   hoveredItemId: string | null;
   onMarkerHover: (id: string | null) => void;
+  viewMode: "full" | "split";
 }
