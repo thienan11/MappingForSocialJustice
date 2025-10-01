@@ -1,7 +1,8 @@
 # Vocal Anonymizer
 
 - Anonymizes a speaker’s voice in a video by pitch-shifting the vocal stem and remixing it with the background audio.
-- Produces a transcript, and subtitles, and embeds the subtitles back into the output by default.
+- Produces a transcript, subtitles, and embeds the subtitles back into the output by default.
+- TODO: Add a more secure anonymization method + add diarization
 
 ## Requirements
 
