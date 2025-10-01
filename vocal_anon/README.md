@@ -3,8 +3,6 @@
 - Anonymizes a speaker’s voice in a video by pitch-shifting the vocal stem and remixing it with the background audio.
 - Produces a transcript, and subtitles, and embeds the subtitles back into the output by default.
 
----
-
 ## Requirements
 
 - **Python:** 3.9–3.12
@@ -15,8 +13,6 @@
 
 If you have an NVIDIA GPU, you can speed up transcription by installing a CUDA build of PyTorch and using `--device cuda`.
 I have not tested this myself.
-
----
 
 ## Install
 
